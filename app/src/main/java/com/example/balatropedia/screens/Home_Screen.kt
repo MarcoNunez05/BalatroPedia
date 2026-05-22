@@ -106,7 +106,7 @@ fun _Home_Screen(navController: NavController)
                     backgroundColor = category.BACKGROUND_COLOR,
                     textColor = category.TEXT_COLOR,
                     onClick = {
-                        
+
                     }
                 )
             }
