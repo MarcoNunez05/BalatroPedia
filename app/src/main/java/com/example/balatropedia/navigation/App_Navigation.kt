@@ -17,11 +17,25 @@ import com.example.balatropedia.screens.JokerDetail
 import com.example.balatropedia.screens.JokerDetailScreen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Jokers_Screen
+import com.example.balatropedia.screens._Login_Screen
+import com.example.balatropedia.screens._Register_Screen
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
 
     val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
+
+    val vIsLoggedIn = auth.currentUser != null
+
+    val vNavegarAlPerfil: () -> Unit = {
+        if (auth.currentUser != null) {
+            navController.navigate("profile_screen")
+        } else {
+            navController.navigate("login")
+        }
+    }
 
     // 1. Instanciamos el ViewModel aquí para compartirlo entre pantallas
     val jokersViewModel: JokersViewModel = viewModel()
@@ -33,7 +47,7 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
         composable("Home") {
             _Home_Screen(
                 isAdmin = isAdmin,
-                onProfileClick = { navController.navigate("profile")},
+                onProfileClick = vNavegarAlPerfil,
                 onCategoryClick = { categoria ->
                     when (categoria) {
                         "jokers" -> navController.navigate("jokers_screen")
@@ -46,7 +60,7 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
         composable(route = "jokers_screen") {
             _Jokers_Screen(
                 isAdmin = isAdmin,
-                onProfileClick = { navController.navigate("profile") },
+                onProfileClick = vNavegarAlPerfil,
                 onNavigateBack = { navController.popBackStack() },
                 onAddJokerClick = { navController.navigate("add_joker") },
                 onJokerClick = { jokerid ->
@@ -81,13 +95,38 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
                     joker = detalleJoker,
                     isAdmin = isAdmin,
                     onNavigateBack = { navController.popBackStack() },
-                    onProfileClick = { navController.navigate("profile") }
+                    onProfileClick = vNavegarAlPerfil
                 )
             } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Cargando detalles...", color = Color.White)
                 }
             }
+        }
+
+        composable(route = "login") {
+            _Login_Screen(
+                onNavigateBack = { navController.popBackStack() },
+                onLoginSuccess = {
+                    navController.navigate("Home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onRegisterClick = {
+                    navController.navigate("register")
+                }
+            )
+        }
+
+        composable(route = "register") {
+            _Register_Screen(
+                onNavigateBack = { navController.popBackStack() },
+                onRegisterSuccess = {
+                    navController.navigate("Home") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
