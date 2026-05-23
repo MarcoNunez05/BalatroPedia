@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BalatroPediaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(modifier = Modifier.padding(innerPadding))
+                    AppNavigation(isAdmin = true, Modifier.padding(innerPadding))
                 }
             }
         }
