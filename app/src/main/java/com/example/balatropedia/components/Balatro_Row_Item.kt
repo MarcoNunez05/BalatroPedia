@@ -39,7 +39,7 @@ fun _Balatro_Row_Item(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp)
+            .height(84.dp)
             .background(backgroundColor)
             .border(2.dp, Color.Black)
             .clickable { onItemClick() }
@@ -50,7 +50,7 @@ fun _Balatro_Row_Item(
             model = imageUrl,
             contentDescription = nombre,
             modifier = Modifier
-                .size(45.dp, 60.dp)
+                .size(50.dp, 72.dp)
                 .padding(end = 12.dp),
             placeholder = painterResource(R.drawable.main_joker),
             error = painterResource(R.drawable.main_joker)

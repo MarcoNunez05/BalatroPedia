@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,34 +34,52 @@ class MainActivity : ComponentActivity() {
                     val auth = FirebaseAuth.getInstance()
                     val db = FirebaseFirestore.getInstance()
 
-                    var isAdmin by remember { mutableStateOf(false) }
-                    var isCheckingRole by remember { mutableStateOf(true) }
+                    var vIsAdmin by remember { mutableStateOf(false) }
+                    var vIsCheckingRole by remember { mutableStateOf(true) }
 
-                    val currentUser = auth.currentUser
 
-                    LaunchedEffect(currentUser) {
-                        if (currentUser != null) {
-                            db.collection("users").document(currentUser.uid).get()
-                                .addOnSuccessListener { document ->
-                                    if (document.exists()) {
-                                        val rol = document.getString("rol")
-                                        isAdmin = (rol == "admin")
-                                    } else {
-                                        isAdmin = false
+                    DisposableEffect(auth) {
+                        var vFirestoreListener: com.google.firebase.firestore.ListenerRegistration? = null
+
+                        val vAuthListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+                            val vUsuarioActual = firebaseAuth.currentUser
+
+                            vFirestoreListener?.remove()
+
+                            if (vUsuarioActual != null) {
+                                vIsCheckingRole = true
+
+                                vFirestoreListener = db.collection("users").document(vUsuarioActual.uid)
+                                    .addSnapshotListener { documento, error ->
+                                        if (error != null) {
+                                            vIsAdmin = false
+                                            vIsCheckingRole = false
+                                            return@addSnapshotListener
+                                        }
+
+                                        if (documento != null && documento.exists()) {
+                                            val vRol = documento.getString("rol")
+                                            vIsAdmin = (vRol == "admin")
+                                        } else {
+                                            vIsAdmin = false
+                                        }
+                                        vIsCheckingRole = false
                                     }
-                                    isCheckingRole = false
-                                }
-                                .addOnFailureListener {
-                                    isAdmin = false
-                                    isCheckingRole = false
-                                }
-                        } else {
-                            isAdmin = false
-                            isCheckingRole = false
+                            } else {
+                                vIsAdmin = false
+                                vIsCheckingRole = false
+                            }
+                        }
+
+                        auth.addAuthStateListener(vAuthListener)
+
+                        onDispose {
+                            auth.removeAuthStateListener(vAuthListener)
+                            vFirestoreListener?.remove()
                         }
                     }
 
-                    if (isCheckingRole) {
+                    if (vIsCheckingRole) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -73,7 +91,7 @@ class MainActivity : ComponentActivity() {
                         }
                     } else {
                         _App_Navigation(
-                            isAdmin = isAdmin,
+                            isAdmin = vIsAdmin,
                             modifier = Modifier.padding(innerPadding)
                         )
                     }

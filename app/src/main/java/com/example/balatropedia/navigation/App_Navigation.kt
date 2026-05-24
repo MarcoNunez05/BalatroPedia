@@ -35,7 +35,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
             navController.navigate("login")
         }
     }
-    
+
     val jokersViewModel: JokersViewModel = viewModel()
 
     NavHost(
@@ -59,7 +59,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
             _Jokers_Screen(
                 isAdmin = isAdmin,
                 onProfileClick = vNavegarAlPerfil,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
                 onAddJokerClick = { navController.navigate("add_joker") },
                 onJokerClick = { jokerid ->
                     navController.navigate("joker_detail/$jokerid")
@@ -93,7 +97,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     joker = detalleJoker,
                     isAdmin = isAdmin,
                     viewModel = jokersViewModel,
-                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateBack = {
+                        if (navController.previousBackStackEntry != null) {
+                            navController.popBackStack()
+                        }
+                    },
                     onProfileClick = vNavegarAlPerfil
                 )
             } else {
@@ -105,7 +113,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         composable(route = "login") {
             _Login_Screen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
                 onLoginSuccess = {
                     navController.navigate("Home") {
                         popUpTo("login") { inclusive = true }
@@ -119,7 +131,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         composable(route = "register") {
             _Register_Screen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
                 onRegisterSuccess = {
                     navController.navigate("Home") {
                         popUpTo("register") { inclusive = true }
@@ -130,7 +146,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         composable(route = "profile_screen") {
             _Profile_Screen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
                 onLogoutSuccess = {
                     navController.navigate("Home") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
