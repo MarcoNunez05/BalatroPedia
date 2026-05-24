@@ -18,6 +18,7 @@ import com.example.balatropedia.screens.JokerDetailScreen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Jokers_Screen
 import com.example.balatropedia.screens._Login_Screen
+import com.example.balatropedia.screens._Profile_Screen
 import com.example.balatropedia.screens._Register_Screen
 import com.google.firebase.auth.FirebaseAuth
 
@@ -26,8 +27,6 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
 
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
-
-    val vIsLoggedIn = auth.currentUser != null
 
     val vNavegarAlPerfil: () -> Unit = {
         if (auth.currentUser != null) {
@@ -124,6 +123,17 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
                 onRegisterSuccess = {
                     navController.navigate("Home") {
                         popUpTo("register") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = "profile_screen") {
+            _Profile_Screen(
+                onNavigateBack = { navController.popBackStack() },
+                onLogoutSuccess = {
+                    navController.navigate("Home") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
             )

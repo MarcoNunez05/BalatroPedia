@@ -16,6 +16,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.balatropedia.ui.theme.COLOR_HEADER
 import com.example.balatropedia.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun _Balatropedia_Header(
@@ -24,6 +26,11 @@ fun _Balatropedia_Header(
     onProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val auth = FirebaseAuth.getInstance()
+    val isLoggedIn = auth.currentUser != null
+
+    val profileIconColor = if (isLoggedIn) Color(0xFFFFD700) else Color.White
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -61,7 +68,7 @@ fun _Balatropedia_Header(
             Icon(
                 imageVector = Icons.Outlined.AccountCircle,
                 contentDescription = "Perfil de usuario",
-                tint = Color.White,
+                tint = profileIconColor,
                 modifier = Modifier.size(36.dp)
             )
         }

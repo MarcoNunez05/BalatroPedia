@@ -97,7 +97,7 @@ fun _Register_Screen(
             )
 
             errorMessage?.let {
-                Text(text = it, color = Color(0xFFE57373), fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
+                Text(text = it, color = Color(0xFFE57373), fontSize = 20.sp, modifier = Modifier.padding(top = 16.dp))
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -118,7 +118,8 @@ fun _Register_Screen(
                                         "username" to username.trim(),
                                         "email" to email.trim(),
                                         "pais" to pais,
-                                        "edad" to edad
+                                        "edad" to edad,
+                                        "rol" to "user"
                                     )
 
                                     if (userId != null) {

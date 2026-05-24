@@ -1,19 +1,28 @@
 package com.example.balatropedia.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -21,12 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.balatropedia.R
+import com.example.balatropedia.components._Auth_Warning_Dialog
 import com.example.balatropedia.components._Balatro_Row_Item
 import com.example.balatropedia.components._Balatropedia_Header
+import com.example.balatropedia.components._Rating_Dialog
 import com.example.balatropedia.components._Rating_Stars
-import com.example.balatropedia.ui.theme.COLOR_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlin.math.round
 
 data class JokerDetail(
     val nombre: String,
@@ -46,6 +59,42 @@ fun JokerDetailScreen(
     onProfileClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+
+    val auth = remember { FirebaseAuth.getInstance() }
+    val db = remember { FirebaseFirestore.getInstance() }
+    val currentUser = auth.currentUser
+
+    val jokerDocumentId = remember(joker.nombre) {
+        "joker_${joker.nombre.lowercase().trim().replace(" ", "_")}"
+    }
+
+    var currentPuntuacion by remember { mutableStateOf(joker.puntuacion) }
+
+    var vShowRatingDialog by remember { mutableStateOf(false) }
+    var vShowAuthWarningDialog by remember { mutableStateOf(false) }
+
+    DisposableEffect(jokerDocumentId) {
+        val docRef = db.collection("jokers").document(jokerDocumentId)
+
+        val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                println("Error en la escucha en tiempo real: ${error.message}")
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val nuevaPuntuacion = snapshot.getDouble("puntuacion")
+                if (nuevaPuntuacion != null) {
+                    currentPuntuacion = nuevaPuntuacion
+                }
+            }
+        }
+
+        onDispose {
+            listenerRegistration.remove()
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -154,10 +203,10 @@ fun JokerDetailScreen(
                         color = Color.Gray,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
                     )
-                } else {
-
                 }
             }
 
@@ -181,7 +230,9 @@ fun JokerDetailScreen(
                         color = Color.Gray,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
                     )
                 } else {
                     joker.sinergiasJokers.forEach { sinergia ->
@@ -199,11 +250,11 @@ fun JokerDetailScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
             // PUNTUACIÓN
             Text(
-                text = "Puntuación de los usuarios: ${joker.puntuacion}/5",
+                text = "Puntuación $currentPuntuacion/5",
                 color = Color.White,
                 fontSize = 30.sp,
                 fontFamily = _BALATRO_FONT,
@@ -211,9 +262,99 @@ fun JokerDetailScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            _Rating_Stars(puntuacion = joker.puntuacion)
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+            _Rating_Stars(puntuacion = currentPuntuacion)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    if (currentUser != null) {
+                        vShowRatingDialog = true
+                    } else {
+                        vShowAuthWarningDialog = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFC5A53F)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "Puntuar este Joker",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontFamily = _BALATRO_FONT
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        if (vShowRatingDialog && currentUser != null) {
+            _Rating_Dialog(
+                onDismiss = { vShowRatingDialog = false },
+                onSubmitRating = { calificacion ->
+                    val votoData = hashMapOf(
+                        "usuarioId" to currentUser.uid,
+                        "jokerNombre" to joker.nombre,
+                        "puntuacion" to calificacion
+                    )
+
+                    val jokerDocRef = db.collection("jokers").document(jokerDocumentId)
+                    val votosCollectionRef = jokerDocRef.collection("votos")
+
+                    votosCollectionRef.document(currentUser.uid)
+                        .set(votoData)
+                        .addOnSuccessListener {
+                            println("¡Voto guardado exitosamente!")
+
+                            // Recalcular promedio
+                            votosCollectionRef.get()
+                                .addOnSuccessListener { snapshot ->
+                                    if (snapshot != null && !snapshot.isEmpty) {
+                                        var vSumaPuntuaciones = 0.0
+                                        val totalVotos = snapshot.size()
+
+                                        for (document in snapshot.documents) {
+                                            val puntos = document.getDouble("puntuacion") ?: 0.0
+                                            vSumaPuntuaciones += puntos
+                                        }
+
+                                        val promedio = vSumaPuntuaciones / totalVotos
+                                        val promedioRedondeado = round(promedio * 10) / 10.0
+
+                                        jokerDocRef.update("puntuacion", promedioRedondeado)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(context, "¡Puntuación registrada con éxito!", Toast.LENGTH_SHORT).show()
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Toast.makeText(context, "Error al actualizar la puntuación.", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                                    vShowRatingDialog = false
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(context, "Error al calcular el promedio.", Toast.LENGTH_SHORT).show()
+                                    vShowRatingDialog = false
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(context, "Error al guardar el voto.", Toast.LENGTH_SHORT).show()
+                            vShowRatingDialog = false
+                        }
+                }
+            )
+        }
+
+        if (vShowAuthWarningDialog) {
+            _Auth_Warning_Dialog(
+                onDismiss = { vShowAuthWarningDialog = false }
+            )
         }
     }
 }
