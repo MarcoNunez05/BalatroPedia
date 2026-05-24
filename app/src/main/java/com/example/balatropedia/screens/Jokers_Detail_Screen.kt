@@ -35,11 +35,10 @@ import com.example.balatropedia.components._Balatro_Row_Item
 import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Rating_Dialog
 import com.example.balatropedia.components._Rating_Stars
+import com.example.balatropedia.models.JokersViewModel
 import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlin.math.round
 
 data class JokerDetail(
     val nombre: String,
@@ -52,9 +51,10 @@ data class JokerDetail(
 )
 
 @Composable
-fun JokerDetailScreen(
+fun _Joker_Detail_Screen(
     joker: JokerDetail,
     isAdmin: Boolean,
+    viewModel: JokersViewModel,
     onNavigateBack: () -> Unit,
     onProfileClick: () -> Unit
 ) {
@@ -62,37 +62,18 @@ fun JokerDetailScreen(
     val context = LocalContext.current
 
     val auth = remember { FirebaseAuth.getInstance() }
-    val db = remember { FirebaseFirestore.getInstance() }
     val currentUser = auth.currentUser
-
-    val jokerDocumentId = remember(joker.nombre) {
-        "joker_${joker.nombre.lowercase().trim().replace(" ", "_")}"
-    }
-
-    var currentPuntuacion by remember { mutableStateOf(joker.puntuacion) }
 
     var vShowRatingDialog by remember { mutableStateOf(false) }
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
-    DisposableEffect(jokerDocumentId) {
-        val docRef = db.collection("jokers").document(jokerDocumentId)
+    val currentPuntuacion by viewModel.puntuacionActual
 
-        val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                println("Error en la escucha en tiempo real: ${error.message}")
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null && snapshot.exists()) {
-                val nuevaPuntuacion = snapshot.getDouble("puntuacion")
-                if (nuevaPuntuacion != null) {
-                    currentPuntuacion = nuevaPuntuacion
-                }
-            }
-        }
+    DisposableEffect(joker.nombre) {
+        viewModel._Iniciar_Listener_Puntuacion(joker.nombre, joker.puntuacion)
 
         onDispose {
-            listenerRegistration.remove()
+            viewModel._Detener_Listener_Puntuacion()
         }
     }
 
@@ -299,62 +280,29 @@ fun JokerDetailScreen(
             _Rating_Dialog(
                 onDismiss = { vShowRatingDialog = false },
                 onSubmitRating = { calificacion ->
-                    val votoData = hashMapOf(
-                        "usuarioId" to currentUser.uid,
-                        "jokerNombre" to joker.nombre,
-                        "puntuacion" to calificacion
-                    )
-
-                    val jokerDocRef = db.collection("jokers").document(jokerDocumentId)
-                    val votosCollectionRef = jokerDocRef.collection("votos")
-
-                    votosCollectionRef.document(currentUser.uid)
-                        .set(votoData)
-                        .addOnSuccessListener {
-                            println("¡Voto guardado exitosamente!")
-
-                            // Recalcular promedio
-                            votosCollectionRef.get()
-                                .addOnSuccessListener { snapshot ->
-                                    if (snapshot != null && !snapshot.isEmpty) {
-                                        var vSumaPuntuaciones = 0.0
-                                        val totalVotos = snapshot.size()
-
-                                        for (document in snapshot.documents) {
-                                            val puntos = document.getDouble("puntuacion") ?: 0.0
-                                            vSumaPuntuaciones += puntos
-                                        }
-
-                                        val promedio = vSumaPuntuaciones / totalVotos
-                                        val promedioRedondeado = round(promedio * 10) / 10.0
-
-                                        jokerDocRef.update("puntuacion", promedioRedondeado)
-                                            .addOnSuccessListener {
-                                                Toast.makeText(context, "¡Puntuación registrada con éxito!", Toast.LENGTH_SHORT).show()
-                                            }
-                                            .addOnFailureListener { e ->
-                                                Toast.makeText(context, "Error al actualizar la puntuación.", Toast.LENGTH_SHORT).show()
-                                            }
-                                    }
-                                    vShowRatingDialog = false
-                                }
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(context, "Error al calcular el promedio.", Toast.LENGTH_SHORT).show()
-                                    vShowRatingDialog = false
-                                }
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(context, "Error al guardar el voto.", Toast.LENGTH_SHORT).show()
+                    viewModel._Guardar_Recalcular(
+                        nombreJoker = joker.nombre,
+                        userId = currentUser.uid,
+                        calificacion = calificacion.toDouble(),
+                        onSuccess = {
+                            Toast.makeText(
+                                context,
+                                "¡Puntuación registrada con éxito!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            vShowRatingDialog = false
+                        },
+                        onError = { mensajeError ->
+                            Toast.makeText(context, mensajeError, Toast.LENGTH_SHORT).show()
                             vShowRatingDialog = false
                         }
+                    )
                 }
             )
         }
 
         if (vShowAuthWarningDialog) {
-            _Auth_Warning_Dialog(
-                onDismiss = { vShowAuthWarningDialog = false }
-            )
+            _Auth_Warning_Dialog(onDismiss = { vShowAuthWarningDialog = false })
         }
     }
 }

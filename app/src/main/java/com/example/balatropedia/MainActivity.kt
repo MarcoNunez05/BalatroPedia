@@ -18,7 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.balatropedia.navigation.AppNavigation
+import com.example.balatropedia.navigation._App_Navigation
 import com.example.balatropedia.ui.theme.BalatroPediaTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
                             CircularProgressIndicator(color = Color(0xFF00BFFF))
                         }
                     } else {
-                        AppNavigation(
+                        _App_Navigation(
                             isAdmin = isAdmin,
                             modifier = Modifier.padding(innerPadding)
                         )

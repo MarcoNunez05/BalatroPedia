@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.balatropedia.models.JokersViewModel
 import com.example.balatropedia.screens.JokerDetail
-import com.example.balatropedia.screens.JokerDetailScreen
+import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Jokers_Screen
 import com.example.balatropedia.screens._Login_Screen
@@ -23,7 +23,7 @@ import com.example.balatropedia.screens._Register_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
+fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
@@ -35,8 +35,7 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
             navController.navigate("login")
         }
     }
-
-    // 1. Instanciamos el ViewModel aquí para compartirlo entre pantallas
+    
     val jokersViewModel: JokersViewModel = viewModel()
 
     NavHost(
@@ -90,9 +89,10 @@ fun AppNavigation(isAdmin: Boolean, modifier: Modifier){
                     )
                 }
 
-                JokerDetailScreen(
+                _Joker_Detail_Screen(
                     joker = detalleJoker,
                     isAdmin = isAdmin,
+                    viewModel = jokersViewModel,
                     onNavigateBack = { navController.popBackStack() },
                     onProfileClick = vNavegarAlPerfil
                 )
