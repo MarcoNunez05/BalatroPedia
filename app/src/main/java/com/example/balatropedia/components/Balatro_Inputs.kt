@@ -28,7 +28,9 @@ fun _Balatro_Input(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    singleLine: Boolean = true,
+    minLines: Int = 1
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -50,7 +52,8 @@ fun _Balatro_Input(
                 focusedTextColor = Color.White, unfocusedTextColor = Color.White
             ),
             shape = RoundedCornerShape(6.dp),
-            singleLine = true,
+            singleLine = singleLine,
+            minLines = minLines,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
         )
     }

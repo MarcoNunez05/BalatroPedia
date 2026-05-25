@@ -3,9 +3,16 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.JokerModel
+import com.example.balatropedia.class_models.JokerSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class JokersViewModel : ViewModel() {
@@ -23,9 +30,17 @@ class JokersViewModel : ViewModel() {
 
     private var _listenerPuntuacion: ListenerRegistration? = null
 
+    private val _jokersSelectorList = MutableStateFlow<List<JokerSelectorModel>>(emptyList())
+    val jokersSelectorList: StateFlow<List<JokerSelectorModel>> = _jokersSelectorList.asStateFlow()
+
+    private val _consumiblesSelectorList = MutableStateFlow<List<JokerSelectorModel>>(emptyList())
+    val consumiblesSelectorList: StateFlow<List<JokerSelectorModel>> = _consumiblesSelectorList.asStateFlow()
+
     init {
         _Obtener_Jokers_De_Firebase()
+        _Cargar_Listas_Selector()
     }
+
 
     fun _Obtener_Jokers_De_Firebase() {
         _isLoading.value = true
@@ -44,10 +59,46 @@ class JokersViewModel : ViewModel() {
             }
     }
 
+    private fun _Cargar_Listas_Selector() {
+        viewModelScope.launch {
+            try {
+                val jokersSnapshot = db.collection("jokers").get().await()
+                val jokersList = jokersSnapshot.documents.mapNotNull { doc ->
+                    val nombre = doc.getString("nombre") ?: return@mapNotNull null
+                    val imagenUrl = doc.getString("imagen_url") ?: ""
+
+                    JokerSelectorModel(
+                        id = doc.id,
+                        nombre = nombre,
+                        imagenUrl = imagenUrl
+                    )
+                }
+                _jokersSelectorList.value = jokersList
+
+                val consumiblesSnapshot = db.collection("consumibles").get().await()
+                val consumiblesList = consumiblesSnapshot.documents.mapNotNull { doc ->
+                    val nombre = doc.getString("nombre") ?: return@mapNotNull null
+                    val imagenUrl = doc.getString("imagen_url") ?: ""
+
+                    JokerSelectorModel(
+                        id = doc.id,
+                        nombre = nombre,
+                        imagenUrl = imagenUrl
+                    )
+                }
+                _consumiblesSelectorList.value = consumiblesList
+
+            } catch (e: Exception) {
+                println("ViewModel - Error al cargar listas del selector: ${e.message}")
+            }
+        }
+    }
+
     fun _Obtener_Joker_Por_ID(idBusqueda: String): JokerModel? {
         return _jokers.value.find { it.id.equals(idBusqueda, ignoreCase = true) }
     }
 
+    // Puntuación
     fun _Iniciar_Listener_Puntuacion(nombreJoker: String, puntuacionBase: Double) {
         _puntuacionActual.value = puntuacionBase
         val jokerDocumentId = "joker_${nombreJoker.lowercase().trim().replace(" ", "_")}"
@@ -114,5 +165,46 @@ class JokersViewModel : ViewModel() {
                     .addOnFailureListener { e -> onError("Error al leer los votos: ${e.message}") }
             }
             .addOnFailureListener { e -> onError("Error al guardar tu voto: ${e.message}") }
+    }
+
+    // Opciones de Admin
+    fun _Añadir_Nuevo_Joker(
+        nombre: String,
+        descripcion: String,
+        rareza: String,
+        jokersSinergia: List<JokerSelectorModel>,
+        consumiblesSinergia: List<JokerSelectorModel>,
+        imagenUrl: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val documentId = "joker_${nombre.lowercase().replace(" ", "_")}"
+
+        val sinergiasJokersMap = jokersSinergia.map {
+            mapOf("id" to it.id, "nombre" to it.nombre)
+        }
+
+        val sinergiasConsumiblesMap = consumiblesSinergia.map {
+            mapOf("id" to it.id, "nombre" to it.nombre)
+        }
+
+        val nuevoJoker = hashMapOf(
+            "nombre" to nombre,
+            "descripcion" to descripcion,
+            "rareza" to rareza,
+            "imagenUrl" to imagenUrl,
+            "puntuacion" to 0.0,
+            "sinergiasJokers" to sinergiasJokersMap,
+            "sinergiasConsumibles" to sinergiasConsumiblesMap
+        )
+
+        db.collection("jokers").document(documentId)
+            .set(nuevoJoker)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { exception ->
+                onError(exception.message ?: "Error desconocido al guardar")
+            }
     }
 }

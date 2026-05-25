@@ -20,6 +20,7 @@ import com.example.balatropedia.screens._Jokers_Screen
 import com.example.balatropedia.screens._Login_Screen
 import com.example.balatropedia.screens._Profile_Screen
 import com.example.balatropedia.screens._Register_Screen
+import com.example.balatropedia.screens._Joker_Add_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -69,6 +70,18 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     navController.navigate("joker_detail/$jokerid")
                 },
                 viewModel = jokersViewModel
+            )
+        }
+
+        composable(route = "add_joker") {
+            _Joker_Add_Screen(
+                viewModel = jokersViewModel,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onProfileClick = vNavegarAlPerfil
             )
         }
 
