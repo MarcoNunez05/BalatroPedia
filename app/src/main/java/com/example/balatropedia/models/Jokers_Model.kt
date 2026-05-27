@@ -28,7 +28,8 @@ class JokersViewModel : ViewModel() {
     private val _puntuacionActual = mutableStateOf(0.0)
     val puntuacionActual: State<Double> = _puntuacionActual
 
-    private var _listenerPuntuacion: ListenerRegistration? = null
+    private var vListenerPuntuacion: ListenerRegistration? = null
+    private var vListenerJokers: ListenerRegistration? = null
 
     private val _jokersSelectorList = MutableStateFlow<List<JokerSelectorModel>>(emptyList())
     val jokersSelectorList: StateFlow<List<JokerSelectorModel>> = _jokersSelectorList.asStateFlow()
@@ -45,17 +46,23 @@ class JokersViewModel : ViewModel() {
     fun _Obtener_Jokers_De_Firebase() {
         _isLoading.value = true
 
-        db.collection("jokers")
-            .get()
-            .addOnSuccessListener { resultado ->
-                val listaTemporal = resultado.map { documento ->
-                    documento.toObject(JokerModel::class.java)
+        vListenerJokers?.remove()
+
+        vListenerJokers = db.collection("jokers")
+            .addSnapshotListener { snapshot, error ->
+                _isLoading.value = false
+
+                if (error != null) {
+                    println("ViewModel - Error en escucha en tiempo real: ${error.message}")
+                    return@addSnapshotListener
                 }
-                _jokers.value = listaTemporal
-                _isLoading.value = false
-            }
-            .addOnFailureListener { exception ->
-                _isLoading.value = false
+
+                if (snapshot != null) {
+                    val listaTemporal = snapshot.documents.mapNotNull { documento ->
+                        documento.toObject(JokerModel::class.java)
+                    }
+                    _jokers.value = listaTemporal
+                }
             }
     }
 
@@ -107,7 +114,7 @@ class JokersViewModel : ViewModel() {
 
         val docRef = db.collection("jokers").document(jokerDocumentId)
 
-        _listenerPuntuacion = docRef.addSnapshotListener { snapshot, error ->
+        vListenerPuntuacion = docRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 println("ViewModel - Error en escucha: ${error.message}")
                 return@addSnapshotListener
@@ -122,8 +129,8 @@ class JokersViewModel : ViewModel() {
     }
 
     fun _Detener_Listener_Puntuacion() {
-        _listenerPuntuacion?.remove()
-        _listenerPuntuacion = null
+        vListenerPuntuacion?.remove()
+        vListenerPuntuacion = null
     }
 
     fun _Guardar_Recalcular(
@@ -189,10 +196,11 @@ class JokersViewModel : ViewModel() {
         }
 
         val nuevoJoker = hashMapOf(
+            "id" to documentId,
             "nombre" to nombre,
             "descripcion" to descripcion,
             "rareza" to rareza,
-            "imagenUrl" to imagenUrl,
+            "imagen_url" to imagenUrl,
             "puntuacion" to 0.0,
             "sinergiasJokers" to sinergiasJokersMap,
             "sinergiasConsumibles" to sinergiasConsumiblesMap
@@ -206,5 +214,11 @@ class JokersViewModel : ViewModel() {
             .addOnFailureListener { exception ->
                 onError(exception.message ?: "Error desconocido al guardar")
             }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        vListenerJokers?.remove()
+        vListenerPuntuacion?.remove()
     }
 }

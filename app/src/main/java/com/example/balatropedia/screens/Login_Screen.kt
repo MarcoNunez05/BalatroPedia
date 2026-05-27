@@ -120,7 +120,7 @@ fun _Login_Screen(
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1BA345)),
                     shape = RoundedCornerShape(6.dp),
-                    enabled = !isLoading // Desactiva el botón si está cargando
+                    enabled = !isLoading
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))

@@ -268,33 +268,33 @@ fun _Joker_Add_Screen(
 
             Spacer(modifier = Modifier.height(40.dp))
         }
+    }
 
-        if (vShowJokerSheet) {
-            _Item_Selector(
-                titulo = "Añadir Joker",
-                itemsDisponibles = listaJokersSelector,
-                onDismiss = { vShowJokerSheet = false },
-                onItemSelected = { jokerSeleccionado ->
-                    if (!JokersSinergia.any { it.id == jokerSeleccionado.id }) {
-                        JokersSinergia.add(jokerSeleccionado)
-                    }
-                    vShowJokerSheet = false
+    if (vShowJokerSheet) {
+        _Item_Selector(
+            titulo = "Añadir Joker",
+            itemsDisponibles = listaJokersSelector,
+            onDismiss = { vShowJokerSheet = false },
+            onItemSelected = { jokerSeleccionado ->
+                if (!JokersSinergia.any { it.id == jokerSeleccionado.id }) {
+                    JokersSinergia.add(jokerSeleccionado)
                 }
-            )
-        }
+                vShowJokerSheet = false
+            }
+        )
+    }
 
-        if (vShowConsumableSheet) {
-            _Item_Selector(
-                titulo = "Añadir Consumible",
-                itemsDisponibles = listaConsumiblesSelector,
-                onDismiss = { vShowConsumableSheet = false },
-                onItemSelected = { consumibleSeleccionado ->
-                    if (!ConsumiblesSinergia.any { it.id == consumibleSeleccionado.id }) {
-                        ConsumiblesSinergia.add(consumibleSeleccionado)
-                    }
-                    vShowConsumableSheet = false
+    if (vShowConsumableSheet) {
+        _Item_Selector(
+            titulo = "Añadir Consumible",
+            itemsDisponibles = listaConsumiblesSelector,
+            onDismiss = { vShowConsumableSheet = false },
+            onItemSelected = { consumibleSeleccionado ->
+                if (!ConsumiblesSinergia.any { it.id == consumibleSeleccionado.id }) {
+                    ConsumiblesSinergia.add(consumibleSeleccionado)
                 }
-            )
-        }
+                vShowConsumableSheet = false
+            }
+        )
     }
 }
