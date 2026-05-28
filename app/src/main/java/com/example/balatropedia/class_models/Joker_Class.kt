@@ -6,5 +6,7 @@ data class JokerModel(
     val descripcion: String = "",
     val rareza: String = "",
     val imagen_url: String = "",
-    val puntuacion_usuarios: Double = 0.0
+    val puntuacion_usuarios: Double = 0.0,
+    val sinergiasJokers: List<Map<String, String>> = emptyList(),
+    val sinergiasConsumibles: List<Map<String, String>> = emptyList()
 )

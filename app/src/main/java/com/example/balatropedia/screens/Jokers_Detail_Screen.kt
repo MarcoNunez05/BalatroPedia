@@ -35,6 +35,7 @@ import com.example.balatropedia.components._Balatro_Row_Item
 import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Rating_Dialog
 import com.example.balatropedia.components._Rating_Stars
+import com.example.balatropedia.components._Related_Section
 import com.example.balatropedia.models.JokersViewModel
 import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
@@ -46,7 +47,7 @@ data class JokerDetail(
     val rareza: String,
     val imagenUrl: String,
     val puntuacion: Double,
-    val sinergiasConsumibles: List<String>,
+    val sinergiasConsumibles: List<Map<String, String>>,
     val sinergiasJokers: List<Map<String, String>>
 )
 
@@ -56,7 +57,8 @@ fun _Joker_Detail_Screen(
     isAdmin: Boolean,
     viewModel: JokersViewModel,
     onNavigateBack: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onRelatedJokerClick: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -171,14 +173,14 @@ fun _Joker_Detail_Screen(
 
             // SINERGIAS CONSUMIBLES
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Sinergias en consumibles:",
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    fontFamily = _BALATRO_FONT
-                )
-                Spacer(modifier = Modifier.height(8.dp))
                 if (joker.sinergiasConsumibles.isEmpty()) {
+                    Text(
+                        text = "Sinergias en consumibles:",
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        fontFamily = _BALATRO_FONT
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Este Joker no tiene sinergias con consumibles",
                         color = Color.Gray,
@@ -187,6 +189,17 @@ fun _Joker_Detail_Screen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
+                    )
+                } else {
+
+                    _Related_Section(
+                        titulo = "Sinergias en consumibles:",
+                        sinergias = joker.sinergiasConsumibles,
+                        viewModel = viewModel,
+                        itemBackgroundColor = Color(0xFF2B3A4A),
+                        onItemClick = { idConsumible ->
+
+                        }
                     )
                 }
             }
@@ -197,15 +210,14 @@ fun _Joker_Detail_Screen(
 
             // SINERGIAS JOKERS
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Sinergias en Jokers:",
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    fontFamily = _BALATRO_FONT
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
                 if (joker.sinergiasJokers.isEmpty()) {
+                    Text(
+                        text = "Sinergias en Jokers:",
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        fontFamily = _BALATRO_FONT
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Este Joker no tiene sinergias con otros Jokers",
                         color = Color.Gray,
@@ -216,18 +228,15 @@ fun _Joker_Detail_Screen(
                             .padding(vertical = 8.dp)
                     )
                 } else {
-                    joker.sinergiasJokers.forEach { sinergia ->
-                        _Balatro_Row_Item(
-                            nombre = sinergia["nombre"] ?: "",
-                            imageUrl = sinergia["imageUrl"] ?: "",
-                            backgroundColor = COLOR_JOKER_BACKGROUND,
-                            isAdmin = false,
-                            onEditClick = {},
-                            onDeleteClick = {},
-                            onItemClick = {}
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                    _Related_Section(
+                        titulo = "Sinergias en Jokers:",
+                        sinergias = joker.sinergiasJokers,
+                        viewModel = viewModel,
+                        itemBackgroundColor = COLOR_JOKER_BACKGROUND,
+                        onItemClick = { idJoker ->
+                            onRelatedJokerClick(idJoker)
+                        }
+                    )
                 }
             }
 

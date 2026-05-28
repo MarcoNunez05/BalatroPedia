@@ -30,6 +30,7 @@ class JokersViewModel : ViewModel() {
 
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerJokers: ListenerRegistration? = null
+    private var vListenerConsumibles: ListenerRegistration? = null
 
     private val _jokersSelectorList = MutableStateFlow<List<JokerSelectorModel>>(emptyList())
     val jokersSelectorList: StateFlow<List<JokerSelectorModel>> = _jokersSelectorList.asStateFlow()
@@ -62,43 +63,42 @@ class JokersViewModel : ViewModel() {
                         documento.toObject(JokerModel::class.java)
                     }
                     _jokers.value = listaTemporal
+
+                    _jokersSelectorList.value = listaTemporal.map { joker ->
+                        JokerSelectorModel(
+                            id = joker.id,
+                            nombre = joker.nombre,
+                            imagenUrl = joker.imagen_url
+                        )
+                    }
                 }
             }
     }
 
     private fun _Cargar_Listas_Selector() {
-        viewModelScope.launch {
-            try {
-                val jokersSnapshot = db.collection("jokers").get().await()
-                val jokersList = jokersSnapshot.documents.mapNotNull { doc ->
-                    val nombre = doc.getString("nombre") ?: return@mapNotNull null
-                    val imagenUrl = doc.getString("imagen_url") ?: ""
+        vListenerConsumibles?.remove()
 
-                    JokerSelectorModel(
-                        id = doc.id,
-                        nombre = nombre,
-                        imagenUrl = imagenUrl
-                    )
+        vListenerConsumibles = db.collection("consumibles")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    println("ViewModel - Error en escucha de consumibles: ${error.message}")
+                    return@addSnapshotListener
                 }
-                _jokersSelectorList.value = jokersList
 
-                val consumiblesSnapshot = db.collection("consumibles").get().await()
-                val consumiblesList = consumiblesSnapshot.documents.mapNotNull { doc ->
-                    val nombre = doc.getString("nombre") ?: return@mapNotNull null
-                    val imagenUrl = doc.getString("imagen_url") ?: ""
+                if (snapshot != null) {
+                    val consumiblesList = snapshot.documents.mapNotNull { doc ->
+                        val nombre = doc.getString("nombre") ?: return@mapNotNull null
+                        val imagenUrl = doc.getString("imagen_url") ?: ""
 
-                    JokerSelectorModel(
-                        id = doc.id,
-                        nombre = nombre,
-                        imagenUrl = imagenUrl
-                    )
+                        JokerSelectorModel(
+                            id = doc.id,
+                            nombre = nombre,
+                            imagenUrl = imagenUrl
+                        )
+                    }
+                    _consumiblesSelectorList.value = consumiblesList
                 }
-                _consumiblesSelectorList.value = consumiblesList
-
-            } catch (e: Exception) {
-                println("ViewModel - Error al cargar listas del selector: ${e.message}")
             }
-        }
     }
 
     fun _Obtener_Joker_Por_ID(idBusqueda: String): JokerModel? {
@@ -216,9 +216,59 @@ class JokersViewModel : ViewModel() {
             }
     }
 
+    fun _Actualizar_Joker(
+        id: String,
+        nombre: String,
+        descripcion: String,
+        rareza: String,
+        jokersSinergia: List<JokerSelectorModel>,
+        consumiblesSinergia: List<JokerSelectorModel>,
+        imagenUrl: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val sinergiasJokersMap = jokersSinergia.map {
+            mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl)
+        }
+
+        val sinergiasConsumiblesMap = consumiblesSinergia.map {
+            mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl)
+        }
+
+        val datosActualizados = hashMapOf(
+            "nombre" to nombre,
+            "descripcion" to descripcion,
+            "rareza" to rareza,
+            "imagen_url" to imagenUrl,
+            "sinergiasJokers" to sinergiasJokersMap,
+            "sinergiasConsumibles" to sinergiasConsumiblesMap
+        )
+
+        db.collection("jokers").document(id)
+            .update(datosActualizados as Map<String, Any>)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception ->
+                onError(exception.message ?: "Error al actualizar el Joker")
+            }
+    }
+
+    fun _Eliminar_Joker(
+        id: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        db.collection("jokers").document(id)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception ->
+                onError(exception.message ?: "Error al eliminar el Joker")
+            }
+    }
+
     override fun onCleared() {
         super.onCleared()
         vListenerJokers?.remove()
         vListenerPuntuacion?.remove()
+        vListenerConsumibles?.remove()
     }
 }

@@ -93,4 +93,6 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
 
     implementation("com.google.firebase:firebase-auth")
+
+    implementation("androidx.compose.material:material-icons-extended")
 }

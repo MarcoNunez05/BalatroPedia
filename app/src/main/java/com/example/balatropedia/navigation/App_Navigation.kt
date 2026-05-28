@@ -9,9 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.balatropedia.models.JokersViewModel
 import com.example.balatropedia.screens.JokerDetail
 import com.example.balatropedia.screens._Joker_Detail_Screen
@@ -21,6 +23,7 @@ import com.example.balatropedia.screens._Login_Screen
 import com.example.balatropedia.screens._Profile_Screen
 import com.example.balatropedia.screens._Register_Screen
 import com.example.balatropedia.screens._Joker_Add_Screen
+import com.example.balatropedia.screens._Joker_Edit_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -69,6 +72,9 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                 onJokerClick = { jokerid ->
                     navController.navigate("joker_detail/$jokerid")
                 },
+                onEditJokerClick = { id ->
+                    navController.navigate("edit_joker/$id")
+                },
                 viewModel = jokersViewModel
             )
         }
@@ -81,6 +87,20 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_joker/{jokerId}",
+            arguments = listOf(navArgument("jokerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val jokerId = backStackEntry.arguments?.getString("jokerId") ?: ""
+
+            _Joker_Edit_Screen(
+                jokerId = jokerId,
+                viewModel = jokersViewModel,
+                onNavigateBack = { navController.popBackStack() },
                 onProfileClick = vNavegarAlPerfil
             )
         }
@@ -99,10 +119,8 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         rareza = joker.rareza ?: "Común",
                         imagenUrl = joker.imagen_url,
                         puntuacion = joker.puntuacion_usuarios ?: 0.0,
-                        sinergiasConsumibles = emptyList(),
-                        sinergiasJokers = listOf(
-
-                        )
+                        sinergiasJokers = joker.sinergiasJokers,
+                        sinergiasConsumibles = joker.sinergiasConsumibles
                     )
                 }
 
@@ -115,7 +133,10 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                             navController.popBackStack()
                         }
                     },
-                    onProfileClick = vNavegarAlPerfil
+                    onProfileClick = vNavegarAlPerfil,
+                    onRelatedJokerClick = { idSinergia ->
+                        navController.navigate("joker_detail/$idSinergia")
+                    }
                 )
             } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
