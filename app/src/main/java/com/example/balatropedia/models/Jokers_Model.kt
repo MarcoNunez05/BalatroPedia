@@ -3,16 +3,13 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.JokerModel
-import com.example.balatropedia.class_models.JokerSelectorModel
+import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class JokersViewModel : ViewModel() {
@@ -32,11 +29,11 @@ class JokersViewModel : ViewModel() {
     private var vListenerJokers: ListenerRegistration? = null
     private var vListenerConsumibles: ListenerRegistration? = null
 
-    private val _jokersSelectorList = MutableStateFlow<List<JokerSelectorModel>>(emptyList())
-    val jokersSelectorList: StateFlow<List<JokerSelectorModel>> = _jokersSelectorList.asStateFlow()
+    private val _jokersSelectorList = MutableStateFlow<List<ItemSelectorModel>>(emptyList())
+    val jokersSelectorList: StateFlow<List<ItemSelectorModel>> = _jokersSelectorList.asStateFlow()
 
-    private val _consumiblesSelectorList = MutableStateFlow<List<JokerSelectorModel>>(emptyList())
-    val consumiblesSelectorList: StateFlow<List<JokerSelectorModel>> = _consumiblesSelectorList.asStateFlow()
+    private val _consumiblesSelectorList = MutableStateFlow<List<ItemSelectorModel>>(emptyList())
+    val consumiblesSelectorList: StateFlow<List<ItemSelectorModel>> = _consumiblesSelectorList.asStateFlow()
 
     init {
         _Obtener_Jokers_De_Firebase()
@@ -65,7 +62,7 @@ class JokersViewModel : ViewModel() {
                     _jokers.value = listaTemporal
 
                     _jokersSelectorList.value = listaTemporal.map { joker ->
-                        JokerSelectorModel(
+                        ItemSelectorModel(
                             id = joker.id,
                             nombre = joker.nombre,
                             imagenUrl = joker.imagen_url
@@ -90,7 +87,7 @@ class JokersViewModel : ViewModel() {
                         val nombre = doc.getString("nombre") ?: return@mapNotNull null
                         val imagenUrl = doc.getString("imagen_url") ?: ""
 
-                        JokerSelectorModel(
+                        ItemSelectorModel(
                             id = doc.id,
                             nombre = nombre,
                             imagenUrl = imagenUrl
@@ -133,6 +130,7 @@ class JokersViewModel : ViewModel() {
         vListenerPuntuacion = null
     }
 
+    // Función para guardar el voto dado y recalcular en tiempo real
     fun _Guardar_Recalcular(
         nombreJoker: String,
         userId: String,
@@ -155,14 +153,14 @@ class JokersViewModel : ViewModel() {
                 votosCollectionRef.get()
                     .addOnSuccessListener { snapshot ->
                         if (snapshot != null && !snapshot.isEmpty) {
-                            var sumaPuntuaciones = 0.0
+                            var vSumaPuntuaciones = 0.0
                             val totalVotos = snapshot.size()
 
                             for (document in snapshot.documents) {
-                                sumaPuntuaciones += (document.getDouble("puntuacion") ?: 0.0)
+                                vSumaPuntuaciones += (document.getDouble("puntuacion") ?: 0.0)
                             }
 
-                            val promedioRedondeado = round((sumaPuntuaciones / totalVotos) * 10) / 10.0
+                            val promedioRedondeado = round((vSumaPuntuaciones / totalVotos) * 10) / 10.0
 
                             jokerDocRef.update("puntuacion", promedioRedondeado)
                                 .addOnSuccessListener { onSuccess() }
@@ -179,8 +177,8 @@ class JokersViewModel : ViewModel() {
         nombre: String,
         descripcion: String,
         rareza: String,
-        jokersSinergia: List<JokerSelectorModel>,
-        consumiblesSinergia: List<JokerSelectorModel>,
+        jokersSinergia: List<ItemSelectorModel>,
+        consumiblesSinergia: List<ItemSelectorModel>,
         imagenUrl: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
@@ -188,11 +186,11 @@ class JokersViewModel : ViewModel() {
         val documentId = "joker_${nombre.lowercase().replace(" ", "_")}"
 
         val sinergiasJokersMap = jokersSinergia.map {
-            mapOf("id" to it.id, "nombre" to it.nombre)
+            mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl)
         }
 
         val sinergiasConsumiblesMap = consumiblesSinergia.map {
-            mapOf("id" to it.id, "nombre" to it.nombre)
+            mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl)
         }
 
         val nuevoJoker = hashMapOf(
@@ -221,8 +219,8 @@ class JokersViewModel : ViewModel() {
         nombre: String,
         descripcion: String,
         rareza: String,
-        jokersSinergia: List<JokerSelectorModel>,
-        consumiblesSinergia: List<JokerSelectorModel>,
+        jokersSinergia: List<ItemSelectorModel>,
+        consumiblesSinergia: List<ItemSelectorModel>,
         imagenUrl: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit

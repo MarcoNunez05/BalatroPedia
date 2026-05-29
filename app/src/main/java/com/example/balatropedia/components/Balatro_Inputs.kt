@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
+// Barra general donde el usuario puede escribir
 fun _Balatro_Input(
     label: String,
     value: String,
@@ -60,6 +61,7 @@ fun _Balatro_Input(
 }
 
 @Composable
+// Selector donde el usuario puede elegir entre opciones pre-definidas
 fun _Balatro_Selector(
     label: String,
     value: String,
@@ -67,7 +69,7 @@ fun _Balatro_Selector(
     onOptionSelected: (String) -> Unit,
     widthFraction: Float = 1f
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var vExpanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth(widthFraction)) {
         Text(
@@ -86,7 +88,7 @@ fun _Balatro_Selector(
                     .clip(RoundedCornerShape(6.dp))
                     .background(Color(0xFF242832))
                     .border(1.dp, Color(0xFF3F4552), RoundedCornerShape(6.dp))
-                    .clickable() { expanded = !expanded }
+                    .clickable() { vExpanded = !vExpanded }
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -106,8 +108,8 @@ fun _Balatro_Selector(
             }
 
             DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+                expanded = vExpanded,
+                onDismissRequest = { vExpanded = false },
                 modifier = Modifier
                     .background(Color(0xFF2C323F))
                     .border(1.dp, Color(0xFF3F4552), RoundedCornerShape(4.dp))
@@ -123,7 +125,7 @@ fun _Balatro_Selector(
                         },
                         onClick = {
                             onOptionSelected(option)
-                            expanded = false
+                            vExpanded = false
                         },
                         modifier = Modifier.background(Color(0xFF2C323F))
                     )

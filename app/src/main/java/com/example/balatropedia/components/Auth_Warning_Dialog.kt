@@ -22,6 +22,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
+// Dialog para avisar al usuario que tiene que tenen una cuenta e iniciar sesión
 fun _Auth_Warning_Dialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(

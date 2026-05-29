@@ -23,18 +23,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.balatropedia.R
-import com.example.balatropedia.class_models.JokerSelectorModel
+import com.example.balatropedia.class_models.ItemSelectorModel
 import com.example.balatropedia.ui.theme.COLOR_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// Selector de documentos para agregarlos a un documento que se está creando
 fun _Item_Selector(
     titulo: String,
-    itemsDisponibles: List<JokerSelectorModel>,
+    itemsDisponibles: List<ItemSelectorModel>,
     onDismiss: () -> Unit,
-    onItemSelected: (JokerSelectorModel) -> Unit
+    onItemSelected: (ItemSelectorModel) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val coroutineScope = rememberCoroutineScope()

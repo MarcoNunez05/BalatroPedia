@@ -7,14 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.balatropedia.models.JokersViewModel
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
+// Caja donde se muestran los documentos que se relacionan con otro
 fun _Related_Section(
     titulo: String,
     sinergias: List<Map<String, String>>?,
-    viewModel: JokersViewModel,
     itemBackgroundColor: Color,
     onItemClick: (String) -> Unit
 ) {
@@ -38,9 +37,7 @@ fun _Related_Section(
                 sinergias.forEach { item ->
                     val id = item["id"] ?: ""
                     val nombre = item["nombre"] ?: "Desconocido"
-
-                    val jokerCompleto = viewModel._Obtener_Joker_Por_ID(id)
-                    val imagenUrl = jokerCompleto?.imagen_url ?: ""
+                    val imagenUrl = item["imagenUrl"] ?: ""
 
                     _Balatro_Row_Item(
                         nombre = nombre,

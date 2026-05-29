@@ -17,23 +17,27 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.balatropedia.components._Balatro_Input
+import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.ui.theme._BALATRO_FONT
+import com.example.balatropedia.viewmodels.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
+// Pantalla de Login
 fun _Login_Screen(
     onNavigateBack: () -> Unit,
     onLoginSuccess: () -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    viewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val auth = FirebaseAuth.getInstance()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var vIsLoading by remember { mutableStateOf(false) }
+    var vErrorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         modifier = Modifier
@@ -74,7 +78,7 @@ fun _Login_Screen(
                 _Balatro_Input(
                     label = "Correo electrónico",
                     value = email,
-                    onValueChange = { email = it; errorMessage = null }
+                    onValueChange = { email = it; vErrorMessage = null }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -83,10 +87,10 @@ fun _Login_Screen(
                     label = "Contraseña",
                     value = password,
                     isPassword = true,
-                    onValueChange = { password = it; errorMessage = null }
+                    onValueChange = { password = it; vErrorMessage = null }
                 )
 
-                errorMessage?.let { msg ->
+                vErrorMessage?.let { msg ->
                     Text(
                         text = msg,
                         color = Color(0xFFE57373),
@@ -97,37 +101,19 @@ fun _Login_Screen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
+                _Balatro_Primary_Button(
+                    text = "Iniciar sesión",
+                    isLoading = vIsLoading,
+                    color = Color(0xFF1BA345),
                     onClick = {
-                        if (email.isNotBlank() && password.isNotBlank()) {
-                            isLoading = true
-                            errorMessage = null
+                        viewModel._Iniciar_Sesion(
+                            email = email,
+                            pass = password,
+                            onSuccess = onLoginSuccess
+                        )
 
-                            // Petición a Firebase
-                            auth.signInWithEmailAndPassword(email.trim(), password.trim())
-                                .addOnCompleteListener { task ->
-                                    isLoading = false
-                                    if (task.isSuccessful) {
-                                        onLoginSuccess()
-                                    } else {
-                                        errorMessage = task.exception?.localizedMessage ?: "Error al iniciar sesión"
-                                    }
-                                }
-                        } else {
-                            errorMessage = "Por favor, llena todos los campos."
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1BA345)),
-                    shape = RoundedCornerShape(6.dp),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text(text = "Iniciar sesión", color = Color.White, fontSize = 30.sp, fontFamily = _BALATRO_FONT)
                     }
-                }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -140,7 +126,7 @@ fun _Login_Screen(
 
                 Text(
                     text = textoRegistro,
-                    modifier = Modifier.clickable { if (!isLoading) onRegisterClick() }
+                    modifier = Modifier.clickable { if (!vIsLoading) onRegisterClick() }
                 )
             }
         }

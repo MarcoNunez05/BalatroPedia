@@ -17,6 +17,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
+// Dialog para que el usuario pueda seleccionar la puntuación que le dará a un artículo
 fun _Rating_Dialog(
     onDismiss: () -> Unit,
     onSubmitRating: (Int) -> Unit

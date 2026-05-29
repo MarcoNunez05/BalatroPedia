@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
+// Plantilla para los botones de la pantalla principal
 @Composable
 fun _Category_Button(
     text: String,

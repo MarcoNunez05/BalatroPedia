@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 import com.example.balatropedia.ui.theme.COLOR_HEADER
 import com.example.balatropedia.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
 
 @Composable
+// Header que se muestra por toda la página para que el usuario regrese a la pantalla anterior o revise su perfil
 fun _Balatropedia_Header(
     comeBack: Boolean,
     onBackClick: () -> Unit,
@@ -44,6 +44,7 @@ fun _Balatropedia_Header(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
+            // Si se puede volver a una pantalla anterior, se muestra el botón de "volver"
             if (comeBack) {
                 IconButton(onClick = onBackClick) {
                     Icon(

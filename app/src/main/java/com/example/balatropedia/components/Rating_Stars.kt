@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+
 @Composable
+// Gráfico de las estrellas para mostrar como representante de la puntuación
 fun _Rating_Stars(puntuacion: Double) {
 
     val estrellasActivas = puntuacion.toInt()
@@ -22,6 +24,7 @@ fun _Rating_Stars(puntuacion: Double) {
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     ) {
+        // For para pintar las estrellas dependiendo de la puntuación
         for (i in 1..5) {
             Icon(
                 imageVector = Icons.Filled.Star,

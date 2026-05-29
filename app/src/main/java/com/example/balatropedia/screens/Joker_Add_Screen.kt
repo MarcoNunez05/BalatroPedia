@@ -23,9 +23,12 @@ import com.example.balatropedia.R
 import com.example.balatropedia.components._Balatro_Input
 import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Related_Items_Box
-import com.example.balatropedia.class_models.JokerSelectorModel
+import com.example.balatropedia.class_models.ItemSelectorModel
+import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Item_Selector
 import com.example.balatropedia.models.JokersViewModel
+import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
+import com.example.balatropedia.ui.theme.COLOR_JOKER_TEXT
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,8 +48,8 @@ fun _Joker_Add_Screen(
     var vRarezaSeleccionada by remember { mutableStateOf(ListaRarezas[0]) }
     var vRarezaExpanded by remember { mutableStateOf(false) }
 
-    val JokersSinergia = remember { mutableStateListOf<JokerSelectorModel>() }
-    val ConsumiblesSinergia = remember { mutableStateListOf<JokerSelectorModel>() }
+    val JokersSinergia = remember { mutableStateListOf<ItemSelectorModel>() }
+    val ConsumiblesSinergia = remember { mutableStateListOf<ItemSelectorModel>() }
 
     var vImagenUrl by remember { mutableStateOf("") }
     var vIsSaving by remember { mutableStateOf(false) }
@@ -223,12 +226,15 @@ fun _Joker_Add_Screen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
+            _Balatro_Primary_Button(
+                text = "Registrar nuevo Joker",
+                isLoading = vIsSaving,
                 onClick = {
                     if (vNombre.isBlank() || vDescripcion.isBlank() || vImagenUrl.isBlank()) {
                         Toast.makeText(context, "Faltan datos obligatorios", Toast.LENGTH_SHORT).show()
-                        return@Button
+                        return@_Balatro_Primary_Button
                     }
+
                     vIsSaving = true
                     viewModel._Añadir_Nuevo_Joker(
                         nombre = vNombre,
@@ -246,25 +252,8 @@ fun _Joker_Add_Screen(
                             vIsSaving = false
                         }
                     )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp),
-                enabled = !vIsSaving,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00BFFF)),
-                shape = RoundedCornerShape(6.dp)
-            ) {
-                if (vIsSaving) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                } else {
-                    Text(
-                        text = "Registrar nuevo Joker",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
                 }
-            }
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }

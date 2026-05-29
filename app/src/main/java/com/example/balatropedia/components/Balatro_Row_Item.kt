@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import com.example.balatropedia.R
 import coil.compose.AsyncImage
 
-
 @Composable
+// Caja donde se guarda una lista de documentos
 fun _Balatro_Row_Item(
     nombre: String,
     imageUrl: String,
@@ -63,6 +63,7 @@ fun _Balatro_Row_Item(
             modifier = Modifier.weight(1f)
         )
 
+        // Si es admin, se le muestran los íconos de editar y eliminar
         if (isAdmin) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 IconButton(onClick = onEditClick) {

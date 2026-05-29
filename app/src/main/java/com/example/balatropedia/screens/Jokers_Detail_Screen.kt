@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.balatropedia.R
 import com.example.balatropedia.components._Auth_Warning_Dialog
+import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Balatro_Row_Item
 import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Rating_Dialog
@@ -195,7 +196,6 @@ fun _Joker_Detail_Screen(
                     _Related_Section(
                         titulo = "Sinergias en consumibles:",
                         sinergias = joker.sinergiasConsumibles,
-                        viewModel = viewModel,
                         itemBackgroundColor = Color(0xFF2B3A4A),
                         onItemClick = { idConsumible ->
 
@@ -231,7 +231,6 @@ fun _Joker_Detail_Screen(
                     _Related_Section(
                         titulo = "Sinergias en Jokers:",
                         sinergias = joker.sinergiasJokers,
-                        viewModel = viewModel,
                         itemBackgroundColor = COLOR_JOKER_BACKGROUND,
                         onItemClick = { idJoker ->
                             onRelatedJokerClick(idJoker)
@@ -258,29 +257,18 @@ fun _Joker_Detail_Screen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            _Balatro_Primary_Button(
+                text = "Puntuar este Joker",
+                isLoading = false,
+                color = Color(0xFFC5A53F),
                 onClick = {
                     if (currentUser != null) {
                         vShowRatingDialog = true
                     } else {
                         vShowAuthWarningDialog = true
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC5A53F)
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = "Puntuar este Joker",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontFamily = _BALATRO_FONT
-                )
-            }
+                }
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
         }

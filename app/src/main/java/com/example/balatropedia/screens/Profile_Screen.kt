@@ -34,6 +34,7 @@ data class UserRating(
 )
 
 @Composable
+// Pantalla de visualización de perfil de usuario
 fun _Profile_Screen(
     onNavigateBack: () -> Unit,
     onLogoutSuccess: () -> Unit

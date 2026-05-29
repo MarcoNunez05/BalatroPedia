@@ -29,18 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.balatropedia.class_models.JokerSelectorModel
+import com.example.balatropedia.class_models.ItemSelectorModel
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
+// Diseño de la caja donde se guardan los documentos seleccionados de _Item_Selector
 fun _Related_Items_Box(
     label: String,
     instructions: String,
     buttonText: String,
-    selectedItems: SnapshotStateList<JokerSelectorModel>,
+    selectedItems: SnapshotStateList<ItemSelectorModel>,
     onAddClick: () -> Unit,
-    onRemoveItem: (JokerSelectorModel) -> Unit
+    onRemoveItem: (ItemSelectorModel) -> Unit
 ) {
     Text(text = label, color = Color.White, fontSize = 24.sp, fontFamily = _BALATRO_FONT, modifier = Modifier.fillMaxWidth())
     Spacer(modifier = Modifier.height(4.dp))

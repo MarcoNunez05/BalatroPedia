@@ -26,6 +26,7 @@ import com.example.balatropedia.screens._Joker_Add_Screen
 import com.example.balatropedia.screens._Joker_Edit_Screen
 import com.google.firebase.auth.FirebaseAuth
 
+// Función que controla la navegación de la app
 @Composable
 fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
