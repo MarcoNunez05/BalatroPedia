@@ -26,16 +26,15 @@ import com.example.balatropedia.components._Related_Items_Box
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Item_Selector
-import com.example.balatropedia.models.JokersViewModel
-import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
-import com.example.balatropedia.ui.theme.COLOR_JOKER_TEXT
+import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// Pantalla de edición de datos de un Joker
 fun _Joker_Edit_Screen(
     jokerId: String,
-    viewModel: JokersViewModel,
+    viewModel: JokerViewModel,
     onNavigateBack: () -> Unit,
     onProfileClick: () -> Unit
 ) {

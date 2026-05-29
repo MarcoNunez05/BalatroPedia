@@ -49,6 +49,7 @@ data class CategoryData(
 )
 
 @Composable
+// Pantalla principal
 fun _Home_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.round
 
-class JokersViewModel : ViewModel() {
+class JokerViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
 
@@ -57,7 +57,12 @@ class JokersViewModel : ViewModel() {
 
                 if (snapshot != null) {
                     val listaTemporal = snapshot.documents.mapNotNull { documento ->
-                        documento.toObject(JokerModel::class.java)
+                        try {
+                            documento.toObject(JokerModel::class.java)
+                        } catch (e: Exception) {
+                            println("Error al mapear documento ${documento.id}: ${e.message}")
+                            null
+                        }
                     }
                     _jokers.value = listaTemporal
 
@@ -103,13 +108,12 @@ class JokersViewModel : ViewModel() {
     }
 
     // Puntuación
-    fun _Iniciar_Listener_Puntuacion(nombreJoker: String, puntuacionBase: Double) {
+    fun _Iniciar_Listener_Puntuacion(jokerId: String, puntuacionBase: Double) {
         _puntuacionActual.value = puntuacionBase
-        val jokerDocumentId = "joker_${nombreJoker.lowercase().trim().replace(" ", "_")}"
 
         _Detener_Listener_Puntuacion()
 
-        val docRef = db.collection("jokers").document(jokerDocumentId)
+        val docRef = db.collection("jokers").document(jokerId)
 
         vListenerPuntuacion = docRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -117,7 +121,7 @@ class JokersViewModel : ViewModel() {
                 return@addSnapshotListener
             }
             if (snapshot != null && snapshot.exists()) {
-                val nuevaPuntuacion = snapshot.getDouble("puntuacion")
+                val nuevaPuntuacion = snapshot.getDouble("puntuacion_usuarios")
                 if (nuevaPuntuacion != null) {
                     _puntuacionActual.value = nuevaPuntuacion
                 }
@@ -132,14 +136,14 @@ class JokersViewModel : ViewModel() {
 
     // Función para guardar el voto dado y recalcular en tiempo real
     fun _Guardar_Recalcular(
+        jokerId: String,
         nombreJoker: String,
         userId: String,
         calificacion: Double,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        val jokerDocumentId = "joker_${nombreJoker.lowercase().trim().replace(" ", "_")}"
-        val jokerDocRef = db.collection("jokers").document(jokerDocumentId)
+        val jokerDocRef = db.collection("jokers").document(jokerId)
         val votosCollectionRef = jokerDocRef.collection("votos")
 
         val votoData = hashMapOf(
@@ -162,7 +166,7 @@ class JokersViewModel : ViewModel() {
 
                             val promedioRedondeado = round((vSumaPuntuaciones / totalVotos) * 10) / 10.0
 
-                            jokerDocRef.update("puntuacion", promedioRedondeado)
+                            jokerDocRef.update("puntuacion_usuarios", promedioRedondeado)
                                 .addOnSuccessListener { onSuccess() }
                                 .addOnFailureListener { e -> onError("Error al actualizar la media: ${e.message}") }
                         }
@@ -199,7 +203,7 @@ class JokersViewModel : ViewModel() {
             "descripcion" to descripcion,
             "rareza" to rareza,
             "imagen_url" to imagenUrl,
-            "puntuacion" to 0.0,
+            "puntuacion_usuarios" to 0.0,
             "sinergiasJokers" to sinergiasJokersMap,
             "sinergiasConsumibles" to sinergiasConsumiblesMap
         )

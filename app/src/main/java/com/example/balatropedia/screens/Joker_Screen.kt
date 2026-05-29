@@ -28,7 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.balatropedia.components._Balatro_Row_Item
 import com.example.balatropedia.components._Balatropedia_Header
-import com.example.balatropedia.models.JokersViewModel
+import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,14 +42,15 @@ import com.example.balatropedia.components._Search_Filter_Bar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun _Jokers_Screen(
+// Pantalla de visualización de Jokers
+fun _Joker_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
     onNavigateBack: () -> Unit,
     onAddJokerClick: () -> Unit,
     onEditJokerClick: (String) -> Unit,
     onJokerClick: (String) -> Unit,
-    viewModel: JokersViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: JokerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     var vBusqueda by remember { mutableStateOf("") }
     var vShowFilterSheet by remember { mutableStateOf(false) }

@@ -4,7 +4,6 @@ data class MazoModel(
     val id: String = "",
     val nombre: String = "",
     val descripcion: String = "",
-    val efecto: String = "",
     val imagen_url: String = "",
     val puntuacion_usuarios: Double = 0.0,
     val consumiblesIncluidos: List<Map<String, String>> = emptyList(),

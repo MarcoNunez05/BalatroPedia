@@ -2,7 +2,7 @@ package com.example.balatropedia.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -14,16 +14,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.balatropedia.models.JokersViewModel
-import com.example.balatropedia.screens.JokerDetail
+import com.example.balatropedia.models.JokerViewModel
+import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
-import com.example.balatropedia.screens._Jokers_Screen
+import com.example.balatropedia.screens._Joker_Screen
 import com.example.balatropedia.screens._Login_Screen
 import com.example.balatropedia.screens._Profile_Screen
 import com.example.balatropedia.screens._Register_Screen
 import com.example.balatropedia.screens._Joker_Add_Screen
 import com.example.balatropedia.screens._Joker_Edit_Screen
+import com.example.balatropedia.screens._Mazo_Add_Screen
+import com.example.balatropedia.screens._Mazo_Detail_Screen
+import com.example.balatropedia.screens._Mazo_Edit_Screen
+import com.example.balatropedia.screens._Mazos_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 // Función que controla la navegación de la app
@@ -41,7 +45,8 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
         }
     }
 
-    val jokersViewModel: JokersViewModel = viewModel()
+    val jokerViewModel: JokerViewModel = viewModel()
+    val mazoViewModel: MazoViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -55,97 +60,13 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     when (categoria) {
                         "jokers" -> navController.navigate("jokers_screen")
                         "vouchers" -> navController.navigate("vouchers_screen")
+                        "mazos" -> navController.navigate("mazos_screen")
                     }
                 }
             )
         }
 
-        composable(route = "jokers_screen") {
-            _Jokers_Screen(
-                isAdmin = isAdmin,
-                onProfileClick = vNavegarAlPerfil,
-                onNavigateBack = {
-                    if (navController.previousBackStackEntry != null) {
-                        navController.popBackStack()
-                    }
-                },
-                onAddJokerClick = { navController.navigate("add_joker") },
-                onJokerClick = { jokerid ->
-                    navController.navigate("joker_detail/$jokerid")
-                },
-                onEditJokerClick = { id ->
-                    navController.navigate("edit_joker/$id")
-                },
-                viewModel = jokersViewModel
-            )
-        }
-
-        composable(route = "add_joker") {
-            _Joker_Add_Screen(
-                viewModel = jokersViewModel,
-                onNavigateBack = {
-                    if (navController.previousBackStackEntry != null) {
-                        navController.popBackStack()
-                    }
-                },
-                onProfileClick = vNavegarAlPerfil
-            )
-        }
-
-        composable(
-            route = "edit_joker/{jokerId}",
-            arguments = listOf(navArgument("jokerId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val jokerId = backStackEntry.arguments?.getString("jokerId") ?: ""
-
-            _Joker_Edit_Screen(
-                jokerId = jokerId,
-                viewModel = jokersViewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onProfileClick = vNavegarAlPerfil
-            )
-        }
-
-        composable(route = "joker_detail/{jokerid}") { backStackEntry ->
-
-            val jokerId = backStackEntry.arguments?.getString("jokerid") ?: ""
-
-            val joker = jokersViewModel._Obtener_Joker_Por_ID(jokerId)
-
-            if (joker != null) {
-                val detalleJoker = remember(joker) {
-                    JokerDetail(
-                        nombre = joker.nombre,
-                        descripcion = joker.descripcion ?: "Añade un +4 en el multiplicador a todas las manos jugadas.",
-                        rareza = joker.rareza ?: "Común",
-                        imagenUrl = joker.imagen_url,
-                        puntuacion = joker.puntuacion_usuarios ?: 0.0,
-                        sinergiasJokers = joker.sinergiasJokers,
-                        sinergiasConsumibles = joker.sinergiasConsumibles
-                    )
-                }
-
-                _Joker_Detail_Screen(
-                    joker = detalleJoker,
-                    isAdmin = isAdmin,
-                    viewModel = jokersViewModel,
-                    onNavigateBack = {
-                        if (navController.previousBackStackEntry != null) {
-                            navController.popBackStack()
-                        }
-                    },
-                    onProfileClick = vNavegarAlPerfil,
-                    onRelatedJokerClick = { idSinergia ->
-                        navController.navigate("joker_detail/$idSinergia")
-                    }
-                )
-            } else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Cargando detalles...", color = Color.White)
-                }
-            }
-        }
-
+        // USUARIO
         composable(route = "login") {
             _Login_Screen(
                 onNavigateBack = {
@@ -192,6 +113,151 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     }
                 }
             )
+        }
+
+        // JOKERS
+        composable(route = "jokers_screen") {
+            _Joker_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddJokerClick = { navController.navigate("add_joker") },
+                onJokerClick = { jokerid ->
+                    navController.navigate("joker_detail/$jokerid")
+                },
+                onEditJokerClick = { id ->
+                    navController.navigate("edit_joker/$id")
+                },
+                viewModel = jokerViewModel
+            )
+        }
+
+        composable(route = "add_joker") {
+            _Joker_Add_Screen(
+                viewModel = jokerViewModel,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_joker/{jokerId}",
+            arguments = listOf(navArgument("jokerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val jokerId = backStackEntry.arguments?.getString("jokerId") ?: ""
+
+            _Joker_Edit_Screen(
+                jokerId = jokerId,
+                viewModel = jokerViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(route = "joker_detail/{jokerid}") { backStackEntry ->
+
+            val jokerId = backStackEntry.arguments?.getString("jokerid") ?: ""
+
+            val joker = jokerViewModel._Obtener_Joker_Por_ID(jokerId)
+
+            if (joker != null) {
+                _Joker_Detail_Screen(
+                    joker = joker,
+                    isAdmin = isAdmin,
+                    viewModel = jokerViewModel,
+                    onNavigateBack = {
+                        if (navController.previousBackStackEntry != null) {
+                            navController.popBackStack()
+                        }
+                    },
+                    onProfileClick = vNavegarAlPerfil,
+                    onRelatedJokerClick = { idSinergia ->
+                        navController.navigate("joker_detail/$idSinergia")
+                    }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFFC33C3C))
+                }
+            }
+        }
+
+        // MAZOS
+        composable(route = "mazos_screen") {
+            _Mazos_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddMazoClick = { navController.navigate("add_mazo") },
+                onEditMazoClick = { id ->
+                    navController.navigate("edit_mazo/$id")
+                },
+                onMazoClick = { mazoId ->
+                    navController.navigate("mazo_detail/$mazoId")
+                },
+                viewModel = mazoViewModel
+            )
+        }
+
+        composable(route = "add_mazo") {
+            _Mazo_Add_Screen(
+                viewModel = mazoViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_mazo/{mazoId}",
+            arguments = listOf(navArgument("mazoId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val mazoId = backStackEntry.arguments?.getString("mazoId") ?: ""
+            _Mazo_Edit_Screen(
+                mazoId = mazoId,
+                viewModel = mazoViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "mazo_detail/{mazoId}",
+            arguments = listOf(navArgument("mazoId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val mazoId = backStackEntry.arguments?.getString("mazoId") ?: ""
+            
+            val mazo = mazoViewModel._Obtener_Mazo_Por_ID(mazoId)
+
+            if (mazo != null) {
+                _Mazo_Detail_Screen(
+                    mazo = mazo,
+                    viewModel = mazoViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF00BFFF))
+                }
+            }
         }
     }
 }

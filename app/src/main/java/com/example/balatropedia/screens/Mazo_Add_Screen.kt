@@ -26,14 +26,14 @@ import com.example.balatropedia.components._Related_Items_Box
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Item_Selector
-import com.example.balatropedia.models.JokerViewModel
+import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-// Pantalla para añadir Joker a la base de datos
-fun _Joker_Add_Screen(
-    viewModel: JokerViewModel,
+// Pantalla para añadir un Mazo a la base de datos
+fun _Mazo_Add_Screen(
+    viewModel: MazoViewModel,
     onNavigateBack: () -> Unit,
     onProfileClick: () -> Unit
 ) {
@@ -42,21 +42,16 @@ fun _Joker_Add_Screen(
 
     var vNombre by remember { mutableStateOf("") }
     var vDescripcion by remember { mutableStateOf("") }
-
-    val ListaRarezas = listOf("Común", "Poco común", "Rara", "Legendaria")
-    var vRarezaSeleccionada by remember { mutableStateOf(ListaRarezas[0]) }
-    var vRarezaExpanded by remember { mutableStateOf(false) }
-
-    val JokersSinergia = remember { mutableStateListOf<ItemSelectorModel>() }
-    val ConsumiblesSinergia = remember { mutableStateListOf<ItemSelectorModel>() }
-
     var vImagenUrl by remember { mutableStateOf("") }
     var vIsSaving by remember { mutableStateOf(false) }
 
-    var vShowJokerSheet by remember { mutableStateOf(false) }
+    val VouchersIncluidos = remember { mutableStateListOf<ItemSelectorModel>() }
+    val ConsumiblesIncluidos = remember { mutableStateListOf<ItemSelectorModel>() }
+
+    var vShowVoucherSheet by remember { mutableStateOf(false) }
     var vShowConsumableSheet by remember { mutableStateOf(false) }
 
-    val listaJokersSelector by viewModel.jokersSelectorList.collectAsState()
+    val listaVouchersSelector by viewModel.vouchersSelectorList.collectAsState()
     val listaConsumiblesSelector by viewModel.consumiblesSelectorList.collectAsState()
 
     Scaffold(
@@ -83,7 +78,7 @@ fun _Joker_Add_Screen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Añadir nuevo Joker",
+                text = "Añadir nuevo Mazo",
                 color = Color.White,
                 fontSize = 32.sp,
                 fontFamily = _BALATRO_FONT
@@ -92,7 +87,7 @@ fun _Joker_Add_Screen(
             Spacer(modifier = Modifier.height(24.dp))
 
             _Balatro_Input(
-                label = "Nombre del Joker",
+                label = "Nombre del Mazo",
                 value = vNombre,
                 onValueChange = { vNombre = it }
             )
@@ -100,7 +95,7 @@ fun _Joker_Add_Screen(
             Spacer(modifier = Modifier.height(16.dp))
 
             _Balatro_Input(
-                label = "Descripción del Joker",
+                label = "Descripción del Mazo",
                 value = vDescripcion,
                 onValueChange = { vDescripcion = it },
                 singleLine = false,
@@ -109,81 +104,31 @@ fun _Joker_Add_Screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Rareza del Joker",
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontFamily = _BALATRO_FONT,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                ExposedDropdownMenuBox(
-                    expanded = vRarezaExpanded,
-                    onExpandedChange = { vRarezaExpanded = it }
-                ) {
-                    TextField(
-                        value = vRarezaSeleccionada,
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = vRarezaExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                            .border(1.dp, Color(0xFF3F4552), RoundedCornerShape(6.dp)),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF3F4552),
-                            unfocusedContainerColor = Color(0xFF3F4552),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(6.dp)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = vRarezaExpanded,
-                        onDismissRequest = { vRarezaExpanded = false }
-                    ) {
-                        ListaRarezas.forEach { rareza ->
-                            DropdownMenuItem(
-                                text = { Text(rareza) },
-                                onClick = {
-                                    vRarezaSeleccionada = rareza
-                                    vRarezaExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             _Related_Items_Box(
-                label = "Jokers que generan sinergia",
-                instructions = "Selecciona Jokers de la base de datos.",
-                buttonText = "Añadir Joker",
-                selectedItems = JokersSinergia,
-                onAddClick = { vShowJokerSheet = true },
-                onRemoveItem = { JokersSinergia.remove(it) }
+                label = "Vouchers que incluye este mazo",
+                instructions = "Selecciona cupones de la base de datos.",
+                buttonText = "Añadir Voucher",
+                selectedItems = VouchersIncluidos,
+                onAddClick = { vShowVoucherSheet = true },
+                onRemoveItem = { VouchersIncluidos.remove(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             _Related_Items_Box(
-                label = "Consumibles que generan sinergia",
-                instructions = "Selecciona consumibles de la base de datos.",
+                label = "Consumibles que incluye este mazo",
+                instructions = "Cartas de Tarot o Planeta iniciales.",
                 buttonText = "Añadir Consumible",
-                selectedItems = ConsumiblesSinergia,
+                selectedItems = ConsumiblesIncluidos,
                 onAddClick = { vShowConsumableSheet = true },
-                onRemoveItem = { ConsumiblesSinergia.remove(it) }
+                onRemoveItem = { ConsumiblesIncluidos.remove(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Imagen del Joker (URL)",
+                    text = "Imagen del Mazo (URL)",
                     color = Color.White,
                     fontSize = 24.sp,
                     fontFamily = _BALATRO_FONT,
@@ -226,7 +171,7 @@ fun _Joker_Add_Screen(
             Spacer(modifier = Modifier.height(32.dp))
 
             _Balatro_Primary_Button(
-                text = "Registrar nuevo Joker",
+                text = "Registrar nuevo Mazo",
                 isLoading = vIsSaving,
                 onClick = {
                     if (vNombre.isBlank() || vDescripcion.isBlank() || vImagenUrl.isBlank()) {
@@ -235,15 +180,14 @@ fun _Joker_Add_Screen(
                     }
 
                     vIsSaving = true
-                    viewModel._Añadir_Nuevo_Joker(
+                    viewModel._Añadir_Nuevo_Mazo(
                         nombre = vNombre,
                         descripcion = vDescripcion,
-                        rareza = vRarezaSeleccionada,
-                        jokersSinergia = JokersSinergia,
-                        consumiblesSinergia = ConsumiblesSinergia,
+                        vouchersIncluidos = VouchersIncluidos,
+                        consumiblesIncluidos = ConsumiblesIncluidos,
                         imagenUrl = vImagenUrl,
                         onSuccess = {
-                            Toast.makeText(context, "¡Joker añadido!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "¡Mazo añadido!", Toast.LENGTH_SHORT).show()
                             onNavigateBack()
                         },
                         onError = { error ->
@@ -258,16 +202,16 @@ fun _Joker_Add_Screen(
         }
     }
 
-    if (vShowJokerSheet) {
+    if (vShowVoucherSheet) {
         _Item_Selector(
-            titulo = "Añadir Joker",
-            itemsDisponibles = listaJokersSelector,
-            onDismiss = { vShowJokerSheet = false },
-            onItemSelected = { jokerSeleccionado ->
-                if (!JokersSinergia.any { it.id == jokerSeleccionado.id }) {
-                    JokersSinergia.add(jokerSeleccionado)
+            titulo = "Añadir Voucher",
+            itemsDisponibles = listaVouchersSelector,
+            onDismiss = { vShowVoucherSheet = false },
+            onItemSelected = { voucherSeleccionado ->
+                if (!VouchersIncluidos.any { it.id == voucherSeleccionado.id }) {
+                    VouchersIncluidos.add(voucherSeleccionado)
                 }
-                vShowJokerSheet = false
+                vShowVoucherSheet = false
             }
         )
     }
@@ -278,8 +222,8 @@ fun _Joker_Add_Screen(
             itemsDisponibles = listaConsumiblesSelector,
             onDismiss = { vShowConsumableSheet = false },
             onItemSelected = { consumibleSeleccionado ->
-                if (!ConsumiblesSinergia.any { it.id == consumibleSeleccionado.id }) {
-                    ConsumiblesSinergia.add(consumibleSeleccionado)
+                if (!ConsumiblesIncluidos.any { it.id == consumibleSeleccionado.id }) {
+                    ConsumiblesIncluidos.add(consumibleSeleccionado)
                 }
                 vShowConsumableSheet = false
             }

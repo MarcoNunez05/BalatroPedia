@@ -6,17 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,36 +21,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.balatropedia.R
-import com.example.balatropedia.components._Auth_Warning_Dialog
-import com.example.balatropedia.components._Balatro_Primary_Button
-import com.example.balatropedia.components._Balatro_Row_Item
-import com.example.balatropedia.components._Balatropedia_Header
-import com.example.balatropedia.components._Rating_Dialog
-import com.example.balatropedia.components._Rating_Stars
-import com.example.balatropedia.components._Related_Section
-import com.example.balatropedia.models.JokersViewModel
-import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
+import com.example.balatropedia.class_models.MazoModel
+import com.example.balatropedia.components.*
+import com.example.balatropedia.models.MazoViewModel
+import com.example.balatropedia.ui.theme.COLOR_MAZOS_BACKGROUND
+import com.example.balatropedia.ui.theme.COLOR_STAR
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import com.google.firebase.auth.FirebaseAuth
 
-data class JokerDetail(
-    val nombre: String,
-    val descripcion: String,
-    val rareza: String,
-    val imagenUrl: String,
-    val puntuacion: Double,
-    val sinergiasConsumibles: List<Map<String, String>>,
-    val sinergiasJokers: List<Map<String, String>>
-)
-
 @Composable
-fun _Joker_Detail_Screen(
-    joker: JokerDetail,
-    isAdmin: Boolean,
-    viewModel: JokersViewModel,
+fun _Mazo_Detail_Screen(
+    mazo: MazoModel,
+    viewModel: MazoViewModel,
     onNavigateBack: () -> Unit,
-    onProfileClick: () -> Unit,
-    onRelatedJokerClick: (String) -> Unit
+    onProfileClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -72,9 +47,8 @@ fun _Joker_Detail_Screen(
 
     val currentPuntuacion by viewModel.puntuacionActual
 
-    DisposableEffect(joker.nombre) {
-        viewModel._Iniciar_Listener_Puntuacion(joker.nombre, joker.puntuacion)
-
+    DisposableEffect(mazo.id) {
+        viewModel._Iniciar_Listener_Puntuacion(mazo.id, mazo.puntuacion_usuarios)
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
         }
@@ -108,13 +82,13 @@ fun _Joker_Detail_Screen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
-                    .background(COLOR_JOKER_BACKGROUND)
+                    .background(COLOR_MAZOS_BACKGROUND)
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = joker.imagenUrl,
-                    contentDescription = joker.nombre,
+                    model = mazo.imagen_url,
+                    contentDescription = mazo.nombre,
                     placeholder = painterResource(R.drawable.main_joker),
                     error = painterResource(R.drawable.main_joker),
                     modifier = Modifier
@@ -124,7 +98,7 @@ fun _Joker_Detail_Screen(
                 )
 
                 Text(
-                    text = joker.nombre,
+                    text = mazo.nombre,
                     color = Color.White,
                     fontSize = 40.sp,
                     fontFamily = _BALATRO_FONT,
@@ -148,7 +122,7 @@ fun _Joker_Detail_Screen(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = joker.descripcion,
+                    text = mazo.descripcion,
                     color = Color.White,
                     fontSize = 20.sp,
                     lineHeight = 20.sp
@@ -159,31 +133,18 @@ fun _Joker_Detail_Screen(
             HorizontalDivider(color = Color(0xFF2C323F), thickness = 2.dp)
             Spacer(modifier = Modifier.height(12.dp))
 
-            // RAREZA
-            Text(
-                text = "Rareza: ${joker.rareza}",
-                color = Color.White,
-                fontSize = 30.sp,
-                fontFamily = _BALATRO_FONT,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider(color = Color(0xFF2C323F), thickness = 2.dp)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // SINERGIAS CONSUMIBLES
+            // VOUCHERS INCLUIDOS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (joker.sinergiasConsumibles.isEmpty()) {
+                if (mazo.vouchersIncluidos.isEmpty()) {
                     Text(
-                        text = "Sinergias en consumibles:",
+                        text = "Vouchers incluidos:",
                         color = Color.White,
                         fontSize = 30.sp,
                         fontFamily = _BALATRO_FONT
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Este Joker no tiene sinergias con consumibles",
+                        text = "Este Mazo no incluye Vouchers iniciales",
                         color = Color.Gray,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
@@ -192,14 +153,11 @@ fun _Joker_Detail_Screen(
                             .padding(vertical = 8.dp)
                     )
                 } else {
-
                     _Related_Section(
-                        titulo = "Sinergias en consumibles:",
-                        sinergias = joker.sinergiasConsumibles,
-                        itemBackgroundColor = Color(0xFF2B3A4A),
-                        onItemClick = { idConsumible ->
-
-                        }
+                        titulo = "Vouchers incluidos:",
+                        sinergias = mazo.vouchersIncluidos,
+                        itemBackgroundColor = Color(0xFFC5A53F).copy(alpha = 0.2f),
+                        onItemClick = {  }
                     )
                 }
             }
@@ -208,18 +166,18 @@ fun _Joker_Detail_Screen(
             HorizontalDivider(color = Color(0xFF2C323F), thickness = 2.dp)
             Spacer(modifier = Modifier.height(12.dp))
 
-            // SINERGIAS JOKERS
+            // CONSUMIBLES INCLUIDOS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (joker.sinergiasJokers.isEmpty()) {
+                if (mazo.consumiblesIncluidos.isEmpty()) {
                     Text(
-                        text = "Sinergias en Jokers:",
+                        text = "Consumibles incluidos:",
                         color = Color.White,
                         fontSize = 30.sp,
                         fontFamily = _BALATRO_FONT
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Este Joker no tiene sinergias con otros Jokers",
+                        text = "Este Mazo no incluye Consumibles iniciales",
                         color = Color.Gray,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
@@ -229,12 +187,10 @@ fun _Joker_Detail_Screen(
                     )
                 } else {
                     _Related_Section(
-                        titulo = "Sinergias en Jokers:",
-                        sinergias = joker.sinergiasJokers,
-                        itemBackgroundColor = COLOR_JOKER_BACKGROUND,
-                        onItemClick = { idJoker ->
-                            onRelatedJokerClick(idJoker)
-                        }
+                        titulo = "Consumibles incluidos:",
+                        sinergias = mazo.consumiblesIncluidos,
+                        itemBackgroundColor = Color(0xFF8B4513).copy(alpha = 0.2f),
+                        onItemClick = {  }
                     )
                 }
             }
@@ -258,9 +214,9 @@ fun _Joker_Detail_Screen(
             Spacer(modifier = Modifier.height(24.dp))
 
             _Balatro_Primary_Button(
-                text = "Puntuar este Joker",
+                text = "Puntuar este Mazo",
                 isLoading = false,
-                color = Color(0xFFC5A53F),
+                color = COLOR_STAR,
                 onClick = {
                     if (currentUser != null) {
                         vShowRatingDialog = true
@@ -278,19 +234,16 @@ fun _Joker_Detail_Screen(
                 onDismiss = { vShowRatingDialog = false },
                 onSubmitRating = { calificacion ->
                     viewModel._Guardar_Recalcular(
-                        nombreJoker = joker.nombre,
+                        mazoId = mazo.id,
+                        nombreMazo = mazo.nombre,
                         userId = currentUser.uid,
                         calificacion = calificacion.toDouble(),
                         onSuccess = {
-                            Toast.makeText(
-                                context,
-                                "¡Puntuación registrada con éxito!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "¡Puntuado!", Toast.LENGTH_SHORT).show()
                             vShowRatingDialog = false
                         },
-                        onError = { mensajeError ->
-                            Toast.makeText(context, mensajeError, Toast.LENGTH_SHORT).show()
+                        onError = {
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                             vShowRatingDialog = false
                         }
                     )
@@ -299,7 +252,7 @@ fun _Joker_Detail_Screen(
         }
 
         if (vShowAuthWarningDialog) {
-            _Auth_Warning_Dialog(onDismiss = { vShowAuthWarningDialog = false })
+            _Auth_Warning_Dialog { vShowAuthWarningDialog = false }
         }
     }
 }
