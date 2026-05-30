@@ -4,8 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.balatropedia.class_models.ConsumibleModel
+import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.round
 
 class ConsumibleViewModel : ViewModel() {
@@ -15,6 +19,9 @@ class ConsumibleViewModel : ViewModel() {
     private val _consumibles = mutableStateOf<List<ConsumibleModel>>(emptyList())
     val consumibles: State<List<ConsumibleModel>> = _consumibles
 
+    private val _boostersSelectorList = MutableStateFlow<List<ItemSelectorModel>>(emptyList())
+    val boostersSelectorList: StateFlow<List<ItemSelectorModel>> = _boostersSelectorList.asStateFlow()
+
     private val _isLoading = mutableStateOf(true)
     val isLoading: State<Boolean> = _isLoading
 
@@ -23,9 +30,11 @@ class ConsumibleViewModel : ViewModel() {
 
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerConsumibles: ListenerRegistration? = null
+    private var vListenerSobres: ListenerRegistration? = null
 
     init {
         _Obtener_Consumibles_De_Firebase()
+        _Obtener_Sobres_Para_Selector()
     }
 
     fun _Obtener_Consumibles_De_Firebase() {
@@ -50,6 +59,29 @@ class ConsumibleViewModel : ViewModel() {
                             null
                         }
                     }
+                }
+            }
+    }
+
+    private fun _Obtener_Sobres_Para_Selector() {
+        vListenerSobres?.remove()
+
+        vListenerSobres = db.collection("booster_packs")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    println("Error al obtener sobres para el selector: ${error.message}")
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val listaSobres = snapshot.documents.map { doc ->
+                        ItemSelectorModel(
+                            id = doc.getString("id") ?: doc.id,
+                            nombre = doc.getString("nombre") ?: "Sin nombre",
+                            imagenUrl = doc.getString("imagen_url") ?: ""
+                        )
+                    }
+                    _boostersSelectorList.value = listaSobres
                 }
             }
     }
@@ -194,5 +226,6 @@ class ConsumibleViewModel : ViewModel() {
         super.onCleared()
         vListenerConsumibles?.remove()
         vListenerPuntuacion?.remove()
+        vListenerSobres?.remove()
     }
 }

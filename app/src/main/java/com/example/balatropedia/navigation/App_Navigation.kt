@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.models.VoucherViewModel
+import com.example.balatropedia.models.ConsumibleViewModel
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Joker_Screen
@@ -32,6 +33,10 @@ import com.example.balatropedia.screens._Voucher_Add_Screen
 import com.example.balatropedia.screens._Voucher_Detail_Screen
 import com.example.balatropedia.screens._Voucher_Edit_Screen
 import com.example.balatropedia.screens._Vouchers_Screen
+import com.example.balatropedia.screens._Consumibles_Screen
+import com.example.balatropedia.screens._Consumible_Add_Screen
+import com.example.balatropedia.screens._Consumible_Edit_Screen
+import com.example.balatropedia.screens._Consumible_Detail_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 // Función que controla la navegación de la app
@@ -52,6 +57,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
     val jokerViewModel: JokerViewModel = viewModel()
     val mazoViewModel: MazoViewModel = viewModel()
     val voucherViewModel: VoucherViewModel = viewModel()
+    val consumibleViewModel: ConsumibleViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -66,6 +72,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         "jokers" -> navController.navigate("jokers_screen")
                         "vouchers" -> navController.navigate("vouchers_screen")
                         "mazos" -> navController.navigate("mazos_screen")
+                        "consumibles" -> navController.navigate("consumibles_screen")
+                        "manos" -> navController.navigate("manos_screen")
+                        "boosterPacks" -> navController.navigate("boosterPacks_screen")
+                        "blinds" -> navController.navigate("blinds_screen")
+                        "challenges" -> navController.navigate("challenges_screen")
                     }
                 }
             )
@@ -328,6 +339,73 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFFE99D43))
+                }
+            }
+        }
+
+        // CONSUMIBLES
+        composable(route = "consumibles_screen") {
+            _Consumibles_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddConsumibleClick = { navController.navigate("add_consumible") },
+                onEditConsumibleClick = { id ->
+                    navController.navigate("edit_consumible/$id")
+                },
+                onConsumibleClick = { consumibleId ->
+                    navController.navigate("consumible_detail/$consumibleId")
+                },
+                viewModel = consumibleViewModel
+            )
+        }
+
+        composable(route = "add_consumible") {
+            _Consumible_Add_Screen(
+                viewModel = consumibleViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_consumible/{consumibleId}",
+            arguments = listOf(navArgument("consumibleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val consumibleId = backStackEntry.arguments?.getString("consumibleId") ?: ""
+            _Consumible_Edit_Screen(
+                consumibleId = consumibleId,
+                viewModel = consumibleViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "consumible_detail/{consumibleId}",
+            arguments = listOf(navArgument("consumibleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val consumibleId = backStackEntry.arguments?.getString("consumibleId") ?: ""
+
+            val consumible = consumibleViewModel._Obtener_Consumible_Por_ID(consumibleId)
+
+            if (consumible != null) {
+                _Consumible_Detail_Screen(
+                    consumible = consumible,
+                    viewModel = consumibleViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF8E44AD))
                 }
             }
         }

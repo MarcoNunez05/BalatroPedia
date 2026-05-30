@@ -22,10 +22,10 @@ import com.example.balatropedia.components._Delete_Confirmation_Dialog
 import com.example.balatropedia.components._Empty_State
 import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.ui.theme.COLOR_MAZOS_BACKGROUND
-import com.example.balatropedia.ui.theme.COLOR_MAZOS_TEXT
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
+// Pantalla de visualización de Mazos
 fun _Mazos_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
