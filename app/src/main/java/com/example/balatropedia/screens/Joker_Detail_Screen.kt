@@ -36,6 +36,7 @@ import com.example.balatropedia.components._Rating_Dialog
 import com.example.balatropedia.components._Rating_Stars
 import com.example.balatropedia.components._Related_Section
 import com.example.balatropedia.models.JokerViewModel
+import com.example.balatropedia.ui.theme.COLOR_CONSUMIBLES_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_JOKER_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_STAR
 import com.example.balatropedia.ui.theme._BALATRO_FONT
@@ -49,7 +50,8 @@ fun _Joker_Detail_Screen(
     viewModel: JokerViewModel,
     onNavigateBack: () -> Unit,
     onProfileClick: () -> Unit,
-    onRelatedJokerClick: (String) -> Unit
+    onNavigateToJoker: (String) -> Unit,
+    onNavigateToConsumible: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -186,9 +188,9 @@ fun _Joker_Detail_Screen(
                     _Related_Section(
                         titulo = "Sinergias en consumibles:",
                         sinergias = joker.sinergiasConsumibles,
-                        itemBackgroundColor = Color(0xFF2B3A4A),
+                        itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
                         onItemClick = { idConsumible ->
-
+                            onNavigateToConsumible(idConsumible)
                         }
                     )
                 }
@@ -223,7 +225,7 @@ fun _Joker_Detail_Screen(
                         sinergias = joker.sinergiasJokers,
                         itemBackgroundColor = COLOR_JOKER_BACKGROUND,
                         onItemClick = { idJoker ->
-                            onRelatedJokerClick(idJoker)
+                            onNavigateToJoker(idJoker)
                         }
                     )
                 }

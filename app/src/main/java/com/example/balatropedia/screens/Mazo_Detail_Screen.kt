@@ -24,8 +24,10 @@ import com.example.balatropedia.R
 import com.example.balatropedia.class_models.MazoModel
 import com.example.balatropedia.components.*
 import com.example.balatropedia.models.MazoViewModel
+import com.example.balatropedia.ui.theme.COLOR_CONSUMIBLES_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_MAZOS_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_STAR
+import com.example.balatropedia.ui.theme.COLOR_VOUCHERS_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import com.google.firebase.auth.FirebaseAuth
 
@@ -35,7 +37,9 @@ fun _Mazo_Detail_Screen(
     mazo: MazoModel,
     viewModel: MazoViewModel,
     onNavigateBack: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onNavigateToVoucher: (String) -> Unit,
+    onNavigateToConsumible: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -157,8 +161,10 @@ fun _Mazo_Detail_Screen(
                     _Related_Section(
                         titulo = "Vouchers incluidos:",
                         sinergias = mazo.vouchersIncluidos,
-                        itemBackgroundColor = Color(0xFFC5A53F).copy(alpha = 0.2f),
-                        onItemClick = {  }
+                        itemBackgroundColor = COLOR_VOUCHERS_BACKGROUND,
+                        onItemClick = { idVoucher ->
+                            onNavigateToVoucher(idVoucher)
+                        }
                     )
                 }
             }
@@ -190,8 +196,10 @@ fun _Mazo_Detail_Screen(
                     _Related_Section(
                         titulo = "Consumibles incluidos:",
                         sinergias = mazo.consumiblesIncluidos,
-                        itemBackgroundColor = Color(0xFF8B4513).copy(alpha = 0.2f),
-                        onItemClick = {  }
+                        itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
+                        onItemClick = { idConsumible ->
+                            onNavigateToConsumible(idConsumible)
+                        }
                     )
                 }
             }

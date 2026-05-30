@@ -195,8 +195,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         }
                     },
                     onProfileClick = vNavegarAlPerfil,
-                    onRelatedJokerClick = { idSinergia ->
-                        navController.navigate("joker_detail/$idSinergia")
+                    onNavigateToJoker = { idJoker ->
+                        navController.navigate("joker_detail/$idJoker")
+                    },
+                    onNavigateToConsumible = { idConsumible ->
+                        navController.navigate("consumible_detail/$idConsumible")
                     }
                 )
             } else {
@@ -264,7 +267,13 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     mazo = mazo,
                     viewModel = mazoViewModel,
                     onNavigateBack = { navController.popBackStack() },
-                    onProfileClick = vNavegarAlPerfil
+                    onProfileClick = vNavegarAlPerfil,
+                    onNavigateToVoucher = { idVoucher ->
+                        navController.navigate("voucher_detail/$idVoucher")
+                    },
+                    onNavigateToConsumible = { idConsumible ->
+                        navController.navigate("consumible_detail/$idConsumible")
+                    }
                 )
             } else {
                 Box(
