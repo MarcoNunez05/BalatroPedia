@@ -160,7 +160,17 @@ fun _Mazos_Screen(
                 val idBorrar = vMazoAEliminar
                 vMazoAEliminar = null
 
-                Toast.makeText(context, "Mazo eliminado (Simulado)", Toast.LENGTH_SHORT).show()
+                if (idBorrar != null) {
+                    viewModel._Eliminar_Mazo(
+                        id = idBorrar,
+                        onSuccess = {
+                            Toast.makeText(context, "Mazo eliminado", Toast.LENGTH_SHORT).show()
+                        },
+                        onError = { error ->
+                            Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
             }
         )
     }
