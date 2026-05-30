@@ -129,7 +129,8 @@ fun _Joker_Edit_Screen(
             _Balatro_Input(
                 label = "Nombre del Joker",
                 value = vNombre,
-                onValueChange = { vNombre = it }
+                onValueChange = { vNombre = it },
+                readOnly = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))

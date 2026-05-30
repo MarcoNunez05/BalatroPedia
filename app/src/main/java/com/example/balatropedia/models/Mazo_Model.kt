@@ -95,7 +95,7 @@ class MazoViewModel : ViewModel() {
         return _mazos.value.find { it.id.equals(idBusqueda, ignoreCase = true) }
     }
 
-    // Puntuación
+    // SISTEMA DE PUNTUACIÓN EN TIEMPO REAL
     fun _Iniciar_Listener_Puntuacion(mazoId: String, puntuacionBase: Double) {
         _puntuacionActual.value = puntuacionBase
 
@@ -117,7 +117,6 @@ class MazoViewModel : ViewModel() {
         vListenerPuntuacion = null
     }
 
-    // Función para guardar el voto dado y recalcular en tiempo real
     fun _Guardar_Recalcular(
         mazoId: String,
         nombreMazo: String,
@@ -154,7 +153,7 @@ class MazoViewModel : ViewModel() {
             .addOnFailureListener { e -> onError("Error al guardar tu voto: ${e.message}") }
     }
 
-    // Opciones de Admin
+    // OPCIONES DE ADMINISTRADOR
     fun _Añadir_Nuevo_Mazo(
         nombre: String,
         descripcion: String,
@@ -169,20 +168,31 @@ class MazoViewModel : ViewModel() {
         val vouchersMap = vouchersIncluidos.map { mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl) }
         val consumiblesMap = consumiblesIncluidos.map { mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl) }
 
-        val nuevoMazo = hashMapOf(
-            "id" to documentId,
-            "nombre" to nombre,
-            "descripcion" to descripcion,
-            "imagen_url" to imagenUrl,
-            "puntuacion_usuarios" to 0.0,
-            "vouchersIncluidos" to vouchersMap,
-            "consumiblesIncluidos" to consumiblesMap
-        )
+        val docRef = db.collection("mazos").document(documentId)
 
-        db.collection("mazos").document(documentId)
-            .set(nuevoMazo)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { exception -> onError(exception.message ?: "Error al guardar") }
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    onError("Ya existe un Mazo registrado con el nombre '$nombre'.")
+                } else {
+                    val nuevoMazo = hashMapOf(
+                        "id" to documentId,
+                        "nombre" to nombre,
+                        "descripcion" to descripcion,
+                        "imagen_url" to imagenUrl,
+                        "puntuacion_usuarios" to 0.0,
+                        "vouchersIncluidos" to vouchersMap,
+                        "consumiblesIncluidos" to consumiblesMap
+                    )
+
+                    docRef.set(nuevoMazo)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { exception -> onError(exception.message ?: "Error al guardar") }
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception.message ?: "Error al conectar con la base de datos")
+            }
     }
 
     fun _Actualizar_Mazo(

@@ -37,8 +37,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.example.balatropedia.components._Delete_Confirmation_Dialog
+import com.example.balatropedia.components._Empty_State
 import com.example.balatropedia.components._Filter_Bottom_Sheet
 import com.example.balatropedia.components._Search_Filter_Bar
+import com.example.balatropedia.ui.theme.COLOR_JOKER_TEXT
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +108,7 @@ fun _Joker_Screen(
             contentAlignment = Alignment.Center
         ) {
             if (cargando) {
-                CircularProgressIndicator(color = Color(0xFFC33C3C))
+                CircularProgressIndicator(color = COLOR_JOKER_BACKGROUND)
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -142,16 +144,28 @@ fun _Joker_Screen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    items(listaJokersFiltrada) { joker ->
-                        _Balatro_Row_Item(
-                            nombre = joker.nombre,
-                            imageUrl = joker.imagen_url,
-                            backgroundColor = COLOR_JOKER_BACKGROUND,
-                            isAdmin = isAdmin,
-                            onEditClick = { onEditJokerClick(joker.id) },
-                            onDeleteClick = { vJokerAEliminar = joker.id},
-                            onItemClick = {onJokerClick(joker.id)}
-                        )
+                    if (listaJokersFiltrada.isEmpty()) {
+                        item {
+                            _Empty_State(
+                                mensaje = "No se encontraron Jokers",
+                                subtitulo = if (listaJokers.isEmpty())
+                                    "Aún no hay Jokers registrados en la base de datos."
+                                else
+                                    "No hay Jokers que coincidan con tu búsqueda o filtros."
+                            )
+                        }
+                    } else {
+                        items(listaJokersFiltrada) { joker ->
+                            _Balatro_Row_Item(
+                                nombre = joker.nombre,
+                                imageUrl = joker.imagen_url,
+                                backgroundColor = COLOR_JOKER_BACKGROUND,
+                                isAdmin = isAdmin,
+                                onEditClick = { onEditJokerClick(joker.id) },
+                                onDeleteClick = { vJokerAEliminar = joker.id},
+                                onItemClick = {onJokerClick(joker.id)}
+                            )
+                        }
                     }
 
                     item {

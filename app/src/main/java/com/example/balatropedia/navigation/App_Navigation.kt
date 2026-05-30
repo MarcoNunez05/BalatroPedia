@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.models.MazoViewModel
+import com.example.balatropedia.models.VoucherViewModel
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Joker_Screen
@@ -28,6 +28,10 @@ import com.example.balatropedia.screens._Mazo_Add_Screen
 import com.example.balatropedia.screens._Mazo_Detail_Screen
 import com.example.balatropedia.screens._Mazo_Edit_Screen
 import com.example.balatropedia.screens._Mazos_Screen
+import com.example.balatropedia.screens._Voucher_Add_Screen
+import com.example.balatropedia.screens._Voucher_Detail_Screen
+import com.example.balatropedia.screens._Voucher_Edit_Screen
+import com.example.balatropedia.screens._Vouchers_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 // Función que controla la navegación de la app
@@ -47,6 +51,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
     val jokerViewModel: JokerViewModel = viewModel()
     val mazoViewModel: MazoViewModel = viewModel()
+    val voucherViewModel: VoucherViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -240,7 +245,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
             arguments = listOf(navArgument("mazoId") { type = NavType.StringType })
         ) { backStackEntry ->
             val mazoId = backStackEntry.arguments?.getString("mazoId") ?: ""
-            
+
             val mazo = mazoViewModel._Obtener_Mazo_Por_ID(mazoId)
 
             if (mazo != null) {
@@ -256,6 +261,73 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFF00BFFF))
+                }
+            }
+        }
+
+        // VOUCHERS
+        composable(route = "vouchers_screen") {
+            _Vouchers_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddVoucherClick = { navController.navigate("add_voucher") },
+                onEditVoucherClick = { id ->
+                    navController.navigate("edit_voucher/$id")
+                },
+                onVoucherClick = { voucherId ->
+                    navController.navigate("voucher_detail/$voucherId")
+                },
+                viewModel = voucherViewModel
+            )
+        }
+
+        composable(route = "add_voucher") {
+            _Voucher_Add_Screen(
+                viewModel = voucherViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_voucher/{voucherId}",
+            arguments = listOf(navArgument("voucherId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val voucherId = backStackEntry.arguments?.getString("voucherId") ?: ""
+            _Voucher_Edit_Screen(
+                voucherId = voucherId,
+                viewModel = voucherViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "voucher_detail/{voucherId}",
+            arguments = listOf(navArgument("voucherId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val voucherId = backStackEntry.arguments?.getString("voucherId") ?: ""
+
+            val voucher = voucherViewModel._Obtener_Voucher_Por_ID(voucherId)
+
+            if (voucher != null) {
+                _Voucher_Detail_Screen(
+                    voucher = voucher,
+                    viewModel = voucherViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFFE99D43))
                 }
             }
         }

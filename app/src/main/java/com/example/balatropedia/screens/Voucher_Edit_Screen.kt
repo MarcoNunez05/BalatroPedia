@@ -22,19 +22,16 @@ import coil.compose.AsyncImage
 import com.example.balatropedia.R
 import com.example.balatropedia.components._Balatro_Input
 import com.example.balatropedia.components._Balatropedia_Header
-import com.example.balatropedia.components._Related_Items_Box
-import com.example.balatropedia.class_models.ItemSelectorModel
 import com.example.balatropedia.components._Balatro_Primary_Button
-import com.example.balatropedia.components._Item_Selector
-import com.example.balatropedia.models.MazoViewModel
+import com.example.balatropedia.models.VoucherViewModel
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-// Pantalla para editar un Mazo existente
-fun _Mazo_Edit_Screen(
-    mazoId: String,
-    viewModel: MazoViewModel,
+// Pantalla para editar un Voucher existente
+fun _Voucher_Edit_Screen(
+    voucherId: String,
+    viewModel: VoucherViewModel,
     onNavigateBack: () -> Unit,
     onProfileClick: () -> Unit
 ) {
@@ -42,47 +39,18 @@ fun _Mazo_Edit_Screen(
     val context = LocalContext.current
 
     var vNombre by remember { mutableStateOf("") }
-    var vDescripcion by remember { mutableStateOf("") }
+    var vEfecto by remember { mutableStateOf("") }
+    var vRequisitos by remember { mutableStateOf("") }
     var vImagenUrl by remember { mutableStateOf("") }
     var vIsSaving by remember { mutableStateOf(false) }
 
-    val VouchersIncluidos = remember { mutableStateListOf<ItemSelectorModel>() }
-    val ConsumiblesIncluidos = remember { mutableStateListOf<ItemSelectorModel>() }
-
-    var vShowVoucherSheet by remember { mutableStateOf(false) }
-    var vShowConsumableSheet by remember { mutableStateOf(false) }
-
-    val listaVouchersSelector by viewModel.vouchersSelectorList.collectAsState()
-    val listaConsumiblesSelector by viewModel.consumiblesSelectorList.collectAsState()
-
-    LaunchedEffect(mazoId) {
-        val mazoOriginal = viewModel._Obtener_Mazo_Por_ID(mazoId)
-        if (mazoOriginal != null) {
-            vNombre = mazoOriginal.nombre
-            vDescripcion = mazoOriginal.descripcion
-            vImagenUrl = mazoOriginal.imagen_url
-
-            VouchersIncluidos.clear()
-            mazoOriginal.vouchersIncluidos.forEach { map ->
-                VouchersIncluidos.add(
-                    ItemSelectorModel(
-                        id = map["id"] ?: "",
-                        nombre = map["nombre"] ?: "",
-                        imagenUrl = map["imagenUrl"] ?: ""
-                    )
-                )
-            }
-
-            ConsumiblesIncluidos.clear()
-            mazoOriginal.consumiblesIncluidos.forEach { map ->
-                ConsumiblesIncluidos.add(
-                    ItemSelectorModel(
-                        id = map["id"] ?: "",
-                        nombre = map["nombre"] ?: "",
-                        imagenUrl = map["imagenUrl"] ?: ""
-                    )
-                )
-            }
+    LaunchedEffect(voucherId) {
+        val voucherOriginal = viewModel._Obtener_Voucher_Por_ID(voucherId)
+        if (voucherOriginal != null) {
+            vNombre = voucherOriginal.nombre
+            vEfecto = voucherOriginal.efecto
+            vRequisitos = voucherOriginal.requisitos
+            vImagenUrl = voucherOriginal.imagen_url
         }
     }
 
@@ -110,7 +78,7 @@ fun _Mazo_Edit_Screen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Editar Mazo",
+                text = "Editar Voucher",
                 color = Color.White,
                 fontSize = 32.sp,
                 fontFamily = _BALATRO_FONT
@@ -119,7 +87,7 @@ fun _Mazo_Edit_Screen(
             Spacer(modifier = Modifier.height(24.dp))
 
             _Balatro_Input(
-                label = "Nombre del Mazo",
+                label = "Nombre del Voucher",
                 value = vNombre,
                 onValueChange = { vNombre = it },
                 readOnly = true
@@ -128,40 +96,28 @@ fun _Mazo_Edit_Screen(
             Spacer(modifier = Modifier.height(16.dp))
 
             _Balatro_Input(
-                label = "Descripción del Mazo",
-                value = vDescripcion,
-                onValueChange = { vDescripcion = it },
+                label = "Efecto del Voucher",
+                value = vEfecto,
+                onValueChange = { vEfecto = it },
                 singleLine = false,
                 minLines = 3
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            _Related_Items_Box(
-                label = "Vouchers que incluye este mazo",
-                instructions = "Selecciona cupones de la base de datos.",
-                buttonText = "Añadir Voucher",
-                selectedItems = VouchersIncluidos,
-                onAddClick = { vShowVoucherSheet = true },
-                onRemoveItem = { VouchersIncluidos.remove(it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            _Related_Items_Box(
-                label = "Consumibles que incluye este mazo",
-                instructions = "Cartas de Tarot o Planeta iniciales.",
-                buttonText = "Añadir Consumible",
-                selectedItems = ConsumiblesIncluidos,
-                onAddClick = { vShowConsumableSheet = true },
-                onRemoveItem = { ConsumiblesIncluidos.remove(it) }
+            _Balatro_Input(
+                label = "Requisitos para desbloquear",
+                value = vRequisitos,
+                onValueChange = { vRequisitos = it },
+                singleLine = false,
+                minLines = 2
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Imagen del Mazo (URL)",
+                    text = "Imagen del Voucher (URL)",
                     color = Color.White,
                     fontSize = 24.sp,
                     fontFamily = _BALATRO_FONT,
@@ -174,7 +130,7 @@ fun _Mazo_Edit_Screen(
                         placeholder = painterResource(R.drawable.main_joker),
                         error = painterResource(R.drawable.main_joker),
                         modifier = Modifier
-                            .size(60.dp)
+                            .size(70.dp)
                             .clip(RoundedCornerShape(6.dp))
                             .background(Color(0xFF3F4552)),
                         contentScale = ContentScale.Fit
@@ -207,21 +163,20 @@ fun _Mazo_Edit_Screen(
                 text = "Guardar Cambios",
                 isLoading = vIsSaving,
                 onClick = {
-                    if (vNombre.isBlank() || vDescripcion.isBlank() || vImagenUrl.isBlank()) {
-                        Toast.makeText(context, "Faltan datos obligatorios", Toast.LENGTH_SHORT).show()
+                    if (vNombre.isBlank() || vEfecto.isBlank() || vImagenUrl.isBlank()) {
+                        Toast.makeText(context, "Nombre, Efecto e Imagen son obligatorios", Toast.LENGTH_SHORT).show()
                         return@_Balatro_Primary_Button
                     }
 
                     vIsSaving = true
-                    viewModel._Actualizar_Mazo(
-                        id = mazoId,
+                    viewModel._Actualizar_Voucher(
+                        id = voucherId,
                         nombre = vNombre,
-                        descripcion = vDescripcion,
-                        vouchersIncluidos = VouchersIncluidos,
-                        consumiblesIncluidos = ConsumiblesIncluidos,
+                        efecto = vEfecto,
+                        requisitos = vRequisitos,
                         imagenUrl = vImagenUrl,
                         onSuccess = {
-                            Toast.makeText(context, "¡Mazo actualizado con éxito!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "¡Voucher actualizado con éxito!", Toast.LENGTH_SHORT).show()
                             onNavigateBack()
                         },
                         onError = { error ->
@@ -234,34 +189,6 @@ fun _Mazo_Edit_Screen(
 
             Spacer(modifier = Modifier.height(40.dp))
         }
-    }
-
-    if (vShowVoucherSheet) {
-        _Item_Selector(
-            titulo = "Añadir Voucher",
-            itemsDisponibles = listaVouchersSelector,
-            onDismiss = { vShowVoucherSheet = false },
-            onItemSelected = { voucherSeleccionado ->
-                if (!VouchersIncluidos.any { it.id == voucherSeleccionado.id }) {
-                    VouchersIncluidos.add(voucherSeleccionado)
-                }
-                vShowVoucherSheet = false
-            }
-        )
-    }
-
-    if (vShowConsumableSheet) {
-        _Item_Selector(
-            titulo = "Añadir Consumible",
-            itemsDisponibles = listaConsumiblesSelector,
-            onDismiss = { vShowConsumableSheet = false },
-            onItemSelected = { consumibleSeleccionado ->
-                if (!ConsumiblesIncluidos.any { it.id == consumibleSeleccionado.id }) {
-                    ConsumiblesIncluidos.add(consumibleSeleccionado)
-                }
-                vShowConsumableSheet = false
-            }
-        )
     }
 }
 

@@ -107,7 +107,7 @@ class JokerViewModel : ViewModel() {
         return _jokers.value.find { it.id.equals(idBusqueda, ignoreCase = true) }
     }
 
-    // Puntuación
+    // SISTEMA DE PUNTUACIÓN EN TIEMPO REAL
     fun _Iniciar_Listener_Puntuacion(jokerId: String, puntuacionBase: Double) {
         _puntuacionActual.value = puntuacionBase
 
@@ -134,7 +134,6 @@ class JokerViewModel : ViewModel() {
         vListenerPuntuacion = null
     }
 
-    // Función para guardar el voto dado y recalcular en tiempo real
     fun _Guardar_Recalcular(
         jokerId: String,
         nombreJoker: String,
@@ -176,7 +175,7 @@ class JokerViewModel : ViewModel() {
             .addOnFailureListener { e -> onError("Error al guardar tu voto: ${e.message}") }
     }
 
-    // Opciones de Admin
+    // OPCIONES DE ADMINISTRADOR
     fun _Añadir_Nuevo_Joker(
         nombre: String,
         descripcion: String,
@@ -197,24 +196,31 @@ class JokerViewModel : ViewModel() {
             mapOf("id" to it.id, "nombre" to it.nombre, "imagenUrl" to it.imagenUrl)
         }
 
-        val nuevoJoker = hashMapOf(
-            "id" to documentId,
-            "nombre" to nombre,
-            "descripcion" to descripcion,
-            "rareza" to rareza,
-            "imagen_url" to imagenUrl,
-            "puntuacion_usuarios" to 0.0,
-            "sinergiasJokers" to sinergiasJokersMap,
-            "sinergiasConsumibles" to sinergiasConsumiblesMap
-        )
+        val docRef = db.collection("jokers").document(documentId)
 
-        db.collection("jokers").document(documentId)
-            .set(nuevoJoker)
-            .addOnSuccessListener {
-                onSuccess()
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    onError("Ya existe un Joker registrado con el nombre '$nombre'.")
+                } else {
+                    val nuevoJoker = hashMapOf(
+                        "id" to documentId,
+                        "nombre" to nombre,
+                        "descripcion" to descripcion,
+                        "rareza" to rareza,
+                        "imagen_url" to imagenUrl,
+                        "puntuacion_usuarios" to 0.0,
+                        "sinergiasJokers" to sinergiasJokersMap,
+                        "sinergiasConsumibles" to sinergiasConsumiblesMap
+                    )
+
+                    docRef.set(nuevoJoker)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { exception -> onError(exception.message ?: "Error al guardar") }
+                }
             }
             .addOnFailureListener { exception ->
-                onError(exception.message ?: "Error desconocido al guardar")
+                onError(exception.message ?: "Error al conectar con la base de datos")
             }
     }
 
