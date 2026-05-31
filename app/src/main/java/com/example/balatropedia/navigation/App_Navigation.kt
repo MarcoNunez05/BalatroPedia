@@ -13,12 +13,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.balatropedia.models.BlindViewModel
 import com.example.balatropedia.models.BoosterPackViewModel
 import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.models.VoucherViewModel
 import com.example.balatropedia.models.ConsumibleViewModel
 import com.example.balatropedia.models.ManoViewModel
+import com.example.balatropedia.screens._Blind_Add_Screen
+import com.example.balatropedia.screens._Blind_Detail_Screen
+import com.example.balatropedia.screens._Blind_Edit_Screen
+import com.example.balatropedia.screens._Blind_Screen
 import com.example.balatropedia.screens._BoosterPack_Add_Screen
 import com.example.balatropedia.screens._BoosterPack_Detail_Screen
 import com.example.balatropedia.screens._BoosterPack_Edit_Screen
@@ -70,6 +75,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
     val consumibleViewModel: ConsumibleViewModel = viewModel()
     val manoViewModel: ManoViewModel = viewModel()
     val boosterPackViewModel: BoosterPackViewModel = viewModel()
+    val blindViewModel: BlindViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -567,6 +573,76 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFF4A5568))
+                }
+            }
+        }
+
+        // BLINDS
+        composable(route = "blinds_screen") {
+            _Blind_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddBlindClick = { navController.navigate("add_blind") },
+                onEditBlindClick = { id ->
+                    navController.navigate("edit_blind/$id")
+                },
+                onBlindClick = { blindId ->
+                    navController.navigate("blind_detail/$blindId")
+                },
+                viewModel = blindViewModel
+            )
+        }
+
+        composable(route = "add_blind") {
+            _Blind_Add_Screen(
+                viewModel = blindViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_blind/{blindId}",
+            arguments = listOf(navArgument("blindId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val blindId = backStackEntry.arguments?.getString("blindId") ?: ""
+            _Blind_Edit_Screen(
+                blindId = blindId,
+                viewModel = blindViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "blind_detail/{blindId}",
+            arguments = listOf(navArgument("blindId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val blindId = backStackEntry.arguments?.getString("blindId") ?: ""
+
+            val blind = blindViewModel._Obtener_Blind_Por_ID(blindId)
+
+            if (blind != null) {
+                _Blind_Detail_Screen(
+                    blind = blind,
+                    viewModel = blindViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil,
+                    onNavigateToJoker = { idJoker ->
+                        navController.navigate("joker_detail/$idJoker")
+                    }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF8B0000))
                 }
             }
         }
