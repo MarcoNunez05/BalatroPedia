@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.balatropedia.models.BlindViewModel
 import com.example.balatropedia.models.BoosterPackViewModel
+import com.example.balatropedia.models.ChallengeViewModel
 import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.models.VoucherViewModel
@@ -28,6 +29,10 @@ import com.example.balatropedia.screens._BoosterPack_Add_Screen
 import com.example.balatropedia.screens._BoosterPack_Detail_Screen
 import com.example.balatropedia.screens._BoosterPack_Edit_Screen
 import com.example.balatropedia.screens._BoosterPack_Screen
+import com.example.balatropedia.screens._Challenge_Add_Screen
+import com.example.balatropedia.screens._Challenge_Detail_Screen
+import com.example.balatropedia.screens._Challenge_Edit_Screen
+import com.example.balatropedia.screens._Challenge_Screen
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Joker_Screen
@@ -76,6 +81,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
     val manoViewModel: ManoViewModel = viewModel()
     val boosterPackViewModel: BoosterPackViewModel = viewModel()
     val blindViewModel: BlindViewModel = viewModel()
+    val challengeViewModel: ChallengeViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -643,6 +649,82 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFF8B0000))
+                }
+            }
+        }
+
+        // CHALLENGES
+        composable(route = "challenges_screen") {
+            _Challenge_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddChallengeClick = { navController.navigate("add_challenge") },
+                onEditChallengeClick = { id ->
+                    navController.navigate("edit_challenge/$id")
+                },
+                onChallengeClick = { challengeId ->
+                    navController.navigate("challenge_detail/$challengeId")
+                },
+                viewModel = challengeViewModel
+            )
+        }
+
+        composable(route = "add_challenge") {
+            _Challenge_Add_Screen(
+                viewModel = challengeViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_challenge/{challengeId}",
+            arguments = listOf(navArgument("challengeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getString("challengeId") ?: ""
+            _Challenge_Edit_Screen(
+                challengeId = challengeId,
+                viewModel = challengeViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "challenge_detail/{challengeId}",
+            arguments = listOf(navArgument("challengeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getString("challengeId") ?: ""
+
+            val challenge = challengeViewModel._Obtener_Challenge_Por_ID(challengeId)
+
+            if (challenge != null) {
+                _Challenge_Detail_Screen(
+                    challenge = challenge,
+                    viewModel = challengeViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil,
+                    onNavigateToJoker = { idJoker ->
+                        navController.navigate("joker_detail/$idJoker")
+                    },
+                    onNavigateToConsumible = { idConsumible ->
+                        navController.navigate("consumible_detail/$idConsumible")
+                    },
+                    onNavigateToVoucher = { idVoucher ->
+                        navController.navigate("voucher_detail/$idVoucher")
+                    }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF2E8B57))
                 }
             }
         }

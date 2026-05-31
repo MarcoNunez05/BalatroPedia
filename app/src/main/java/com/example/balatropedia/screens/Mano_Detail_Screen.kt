@@ -290,4 +290,3 @@ fun _Mano_Detail_Screen(
         }
     }
 }
-

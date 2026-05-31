@@ -20,32 +20,32 @@ import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Search_Filter_Bar
 import com.example.balatropedia.components._Delete_Confirmation_Dialog
 import com.example.balatropedia.components._Empty_State
-import com.example.balatropedia.models.ManoViewModel
-import com.example.balatropedia.ui.theme.COLOR_MANOS_BACKGROUND
+import com.example.balatropedia.models.ChallengeViewModel
+import com.example.balatropedia.ui.theme.COLOR_CHALLENGES_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
-// Pantalla de visualización de Manos
-fun _Mano_Screen(
+// Pantalla de visualización de Challenges
+fun _Challenge_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
     onNavigateBack: () -> Unit,
-    onAddManoClick: () -> Unit,
-    onEditManoClick: (String) -> Unit,
-    onManoClick: (String) -> Unit,
-    viewModel: ManoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    onAddChallengeClick: () -> Unit,
+    onEditChallengeClick: (String) -> Unit,
+    onChallengeClick: (String) -> Unit,
+    viewModel: ChallengeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     var vBusqueda by remember { mutableStateOf("") }
-    val listaManos = viewModel.manos.value
+    val listaChallenges = viewModel.challenges.value
     val cargando = viewModel.isLoading.value
 
-    var vManoAEliminar by remember { mutableStateOf<String?>(null) }
+    var vChallengeAEliminar by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    val listaManosFiltrada by remember(vBusqueda, listaManos) {
+    val listaChallengesFiltrada by remember(vBusqueda, listaChallenges) {
         derivedStateOf {
-            listaManos.filter { mano ->
-                mano.nombre.contains(vBusqueda, ignoreCase = true)
+            listaChallenges.filter { challenge ->
+                challenge.nombre.contains(vBusqueda, ignoreCase = true)
             }
         }
     }
@@ -64,11 +64,11 @@ fun _Mano_Screen(
         floatingActionButton = {
             if (isAdmin) {
                 FloatingActionButton(
-                    onClick = onAddManoClick,
-                    containerColor = COLOR_MANOS_BACKGROUND,
+                    onClick = onAddChallengeClick,
+                    containerColor = COLOR_CHALLENGES_BACKGROUND,
                     contentColor = Color.White
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Añadir Mano")
+                    Icon(Icons.Default.Add, contentDescription = "Añadir Challenge")
                 }
             }
         }
@@ -81,7 +81,7 @@ fun _Mano_Screen(
             contentAlignment = Alignment.Center
         ) {
             if (cargando) {
-                CircularProgressIndicator(color = COLOR_MANOS_BACKGROUND)
+                CircularProgressIndicator(color = COLOR_CHALLENGES_BACKGROUND)
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -96,7 +96,7 @@ fun _Mano_Screen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Manos de Póker",
+                                text = "Challenges",
                                 color = Color.White,
                                 fontSize = 30.sp,
                                 fontFamily = _BALATRO_FONT
@@ -108,7 +108,7 @@ fun _Mano_Screen(
                         _Search_Filter_Bar(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
-                            placeholderText = "Buscar Mano...",
+                            placeholderText = "Buscar Challenge...",
                             onFilterClick = {
                                 Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
                             }
@@ -119,26 +119,26 @@ fun _Mano_Screen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    if (listaManosFiltrada.isEmpty()) {
+                    if (listaChallengesFiltrada.isEmpty()) {
                         item {
                             _Empty_State(
-                                mensaje = "No se encontraron Manos",
-                                subtitulo = if (listaManos.isEmpty())
-                                    "Aún no hay Manos registradas en la base de datos."
+                                mensaje = "No se encontraron Challenges",
+                                subtitulo = if (listaChallenges.isEmpty())
+                                    "Aún no hay Challenges registrados en la base de datos."
                                 else
-                                    "No hay Manos que coincidan con tu búsqueda o filtros."
+                                    "No hay Challenges que coincidan con tu búsqueda o filtros."
                             )
                         }
                     } else {
-                        items(listaManosFiltrada) { mano ->
+                        items(listaChallengesFiltrada) { challenge ->
                             _Balatro_Row_Item(
-                                nombre = mano.nombre,
+                                nombre = challenge.nombre,
                                 imageUrl = null,
-                                backgroundColor = COLOR_MANOS_BACKGROUND,
+                                backgroundColor = COLOR_CHALLENGES_BACKGROUND,
                                 isAdmin = isAdmin,
-                                onEditClick = { onEditManoClick(mano.id) },
-                                onDeleteClick = { vManoAEliminar = mano.id },
-                                onItemClick = { onManoClick(mano.id) }
+                                onEditClick = { onEditChallengeClick(challenge.id) },
+                                onDeleteClick = { vChallengeAEliminar = challenge.id },
+                                onItemClick = { onChallengeClick(challenge.id) }
                             )
                         }
                     }
@@ -151,20 +151,20 @@ fun _Mano_Screen(
         }
     }
 
-    if (vManoAEliminar != null) {
+    if (vChallengeAEliminar != null) {
         _Delete_Confirmation_Dialog(
-            titulo = "Eliminar Mano",
-            mensaje = "¿Estás seguro de que deseas eliminar esta mano de la base de datos?",
-            onDismiss = { vManoAEliminar = null },
+            titulo = "Eliminar Challenge",
+            mensaje = "¿Estás seguro de que deseas eliminar este Challenge de la base de datos?",
+            onDismiss = { vChallengeAEliminar = null },
             onConfirm = {
-                val idBorrar = vManoAEliminar
-                vManoAEliminar = null
+                val idBorrar = vChallengeAEliminar
+                vChallengeAEliminar = null
 
                 if (idBorrar != null) {
-                    viewModel._Eliminar_Mano(
+                    viewModel._Eliminar_Challenge(
                         id = idBorrar,
                         onSuccess = {
-                            Toast.makeText(context, "Mano eliminada", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Challenge eliminado", Toast.LENGTH_SHORT).show()
                         },
                         onError = { error ->
                             Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()

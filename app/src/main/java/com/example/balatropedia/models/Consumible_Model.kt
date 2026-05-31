@@ -66,7 +66,7 @@ class ConsumibleViewModel : ViewModel() {
     private fun _Obtener_Sobres_Para_Selector() {
         vListenerSobres?.remove()
 
-        vListenerSobres = db.collection("booster_packs")
+        vListenerSobres = db.collection("boosterPacks")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     println("Error al obtener sobres para el selector: ${error.message}")
