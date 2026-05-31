@@ -26,7 +26,7 @@ import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
 // Pantalla de visualización de Vouchers
-fun _Vouchers_Screen(
+fun _Voucher_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
     onNavigateBack: () -> Unit,

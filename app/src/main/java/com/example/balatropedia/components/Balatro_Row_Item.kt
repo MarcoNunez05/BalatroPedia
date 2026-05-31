@@ -29,7 +29,7 @@ import coil.compose.AsyncImage
 // Caja donde se guarda una lista de documentos
 fun _Balatro_Row_Item(
     nombre: String,
-    imageUrl: String,
+    imageUrl: String? = null,
     backgroundColor: Color,
     isAdmin: Boolean,
     onEditClick: () -> Unit = {},
@@ -46,15 +46,17 @@ fun _Balatro_Row_Item(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = nombre,
-            modifier = Modifier
-                .size(50.dp, 72.dp)
-                .padding(end = 12.dp),
-            placeholder = painterResource(R.drawable.main_joker),
-            error = painterResource(R.drawable.main_joker)
-        )
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = nombre,
+                modifier = Modifier
+                    .size(50.dp, 72.dp)
+                    .padding(end = 12.dp),
+                placeholder = painterResource(R.drawable.main_joker),
+                error = painterResource(R.drawable.main_joker)
+            )
+        }
 
         Text(
             text = nombre,

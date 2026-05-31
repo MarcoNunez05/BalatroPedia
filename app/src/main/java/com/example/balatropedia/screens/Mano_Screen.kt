@@ -20,32 +20,32 @@ import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Search_Filter_Bar
 import com.example.balatropedia.components._Delete_Confirmation_Dialog
 import com.example.balatropedia.components._Empty_State
-import com.example.balatropedia.models.MazoViewModel
-import com.example.balatropedia.ui.theme.COLOR_MAZOS_BACKGROUND
+import com.example.balatropedia.models.ManoViewModel
+import com.example.balatropedia.ui.theme.COLOR_MANOS_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
-// Pantalla de visualización de Mazos
-fun _Mazo_Screen(
+// Pantalla de visualización de Manos
+fun _Mano_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
     onNavigateBack: () -> Unit,
-    onAddMazoClick: () -> Unit,
-    onEditMazoClick: (String) -> Unit,
-    onMazoClick: (String) -> Unit,
-    viewModel: MazoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    onAddManoClick: () -> Unit,
+    onEditManoClick: (String) -> Unit,
+    onManoClick: (String) -> Unit,
+    viewModel: ManoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     var vBusqueda by remember { mutableStateOf("") }
-    val listaMazos = viewModel.mazos.value
+    val listaManos = viewModel.manos.value
     val cargando = viewModel.isLoading.value
 
-    var vMazoAEliminar by remember { mutableStateOf<String?>(null) }
+    var vManoAEliminar by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    val listaMazosFiltrada by remember(vBusqueda, listaMazos) {
+    val listaManosFiltrada by remember(vBusqueda, listaManos) {
         derivedStateOf {
-            listaMazos.filter { mazo ->
-                mazo.nombre.contains(vBusqueda, ignoreCase = true)
+            listaManos.filter { mano ->
+                mano.nombre.contains(vBusqueda, ignoreCase = true)
             }
         }
     }
@@ -64,11 +64,11 @@ fun _Mazo_Screen(
         floatingActionButton = {
             if (isAdmin) {
                 FloatingActionButton(
-                    onClick = onAddMazoClick,
-                    containerColor = COLOR_MAZOS_BACKGROUND,
+                    onClick = onAddManoClick,
+                    containerColor = COLOR_MANOS_BACKGROUND,
                     contentColor = Color.White
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Añadir Mazo")
+                    Icon(Icons.Default.Add, contentDescription = "Añadir Mano")
                 }
             }
         }
@@ -81,7 +81,7 @@ fun _Mazo_Screen(
             contentAlignment = Alignment.Center
         ) {
             if (cargando) {
-                CircularProgressIndicator(color = COLOR_MAZOS_BACKGROUND)
+                CircularProgressIndicator(color = COLOR_MANOS_BACKGROUND)
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -96,7 +96,7 @@ fun _Mazo_Screen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Mazos",
+                                text = "Manos de Póker",
                                 color = Color.White,
                                 fontSize = 30.sp,
                                 fontFamily = _BALATRO_FONT
@@ -108,7 +108,7 @@ fun _Mazo_Screen(
                         _Search_Filter_Bar(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
-                            placeholderText = "Buscar Mazo...",
+                            placeholderText = "Buscar Mano...",
                             onFilterClick = {
                                 Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
                             }
@@ -119,26 +119,26 @@ fun _Mazo_Screen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    if (listaMazosFiltrada.isEmpty()) {
+                    if (listaManosFiltrada.isEmpty()) {
                         item {
                             _Empty_State(
-                                mensaje = "No se encontraron Mazos",
-                                subtitulo = if (listaMazos.isEmpty())
-                                    "Aún no hay Mazos registrados en la base de datos."
+                                mensaje = "No se encontraron Manos",
+                                subtitulo = if (listaManos.isEmpty())
+                                    "Aún no hay Manos registradas en la base de datos."
                                 else
-                                    "No hay Mazos que coincidan con tu búsqueda o filtros."
+                                    "No hay Manos que coincidan con tu búsqueda o filtros."
                             )
                         }
                     } else {
-                        items(listaMazosFiltrada) { mazo ->
+                        items(listaManosFiltrada) { mano ->
                             _Balatro_Row_Item(
-                                nombre = mazo.nombre,
-                                imageUrl = mazo.imagen_url,
-                                backgroundColor = COLOR_MAZOS_BACKGROUND,
+                                nombre = mano.nombre,
+                                imageUrl = null, // Se pasa null para que la imagen no ocupe espacio
+                                backgroundColor = COLOR_MANOS_BACKGROUND,
                                 isAdmin = isAdmin,
-                                onEditClick = { onEditMazoClick(mazo.id) },
-                                onDeleteClick = { vMazoAEliminar = mazo.id },
-                                onItemClick = { onMazoClick(mazo.id) }
+                                onEditClick = { onEditManoClick(mano.id) },
+                                onDeleteClick = { vManoAEliminar = mano.id },
+                                onItemClick = { onManoClick(mano.id) }
                             )
                         }
                     }
@@ -151,20 +151,20 @@ fun _Mazo_Screen(
         }
     }
 
-    if (vMazoAEliminar != null) {
+    if (vManoAEliminar != null) {
         _Delete_Confirmation_Dialog(
-            titulo = "Eliminar Mazo",
-            mensaje = "¿Estás seguro de que deseas eliminar este mazo de la base de datos?",
-            onDismiss = { vMazoAEliminar = null },
+            titulo = "Eliminar Mano",
+            mensaje = "¿Estás seguro de que deseas eliminar esta mano de la base de datos?",
+            onDismiss = { vManoAEliminar = null },
             onConfirm = {
-                val idBorrar = vMazoAEliminar
-                vMazoAEliminar = null
+                val idBorrar = vManoAEliminar
+                vManoAEliminar = null
 
                 if (idBorrar != null) {
-                    viewModel._Eliminar_Mazo(
+                    viewModel._Eliminar_Mano(
                         id = idBorrar,
                         onSuccess = {
-                            Toast.makeText(context, "Mazo eliminado", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Mano eliminada", Toast.LENGTH_SHORT).show()
                         },
                         onError = { error ->
                             Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
@@ -175,3 +175,4 @@ fun _Mazo_Screen(
         )
     }
 }
+

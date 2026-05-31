@@ -27,7 +27,7 @@ import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
 // Pantalla de visualización de Consumibles
-fun _Consumibles_Screen(
+fun _Consumible_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
     onNavigateBack: () -> Unit,

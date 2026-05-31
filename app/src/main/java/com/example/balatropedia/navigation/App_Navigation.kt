@@ -17,6 +17,7 @@ import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.models.VoucherViewModel
 import com.example.balatropedia.models.ConsumibleViewModel
+import com.example.balatropedia.models.ManoViewModel
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Joker_Screen
@@ -28,15 +29,19 @@ import com.example.balatropedia.screens._Joker_Edit_Screen
 import com.example.balatropedia.screens._Mazo_Add_Screen
 import com.example.balatropedia.screens._Mazo_Detail_Screen
 import com.example.balatropedia.screens._Mazo_Edit_Screen
-import com.example.balatropedia.screens._Mazos_Screen
+import com.example.balatropedia.screens._Mazo_Screen
 import com.example.balatropedia.screens._Voucher_Add_Screen
 import com.example.balatropedia.screens._Voucher_Detail_Screen
 import com.example.balatropedia.screens._Voucher_Edit_Screen
-import com.example.balatropedia.screens._Vouchers_Screen
-import com.example.balatropedia.screens._Consumibles_Screen
+import com.example.balatropedia.screens._Voucher_Screen
+import com.example.balatropedia.screens._Consumible_Screen
 import com.example.balatropedia.screens._Consumible_Add_Screen
 import com.example.balatropedia.screens._Consumible_Edit_Screen
 import com.example.balatropedia.screens._Consumible_Detail_Screen
+import com.example.balatropedia.screens._Mano_Add_Screen
+import com.example.balatropedia.screens._Mano_Detail_Screen
+import com.example.balatropedia.screens._Mano_Edit_Screen
+import com.example.balatropedia.screens._Mano_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 // Función que controla la navegación de la app
@@ -58,6 +63,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
     val mazoViewModel: MazoViewModel = viewModel()
     val voucherViewModel: VoucherViewModel = viewModel()
     val consumibleViewModel: ConsumibleViewModel = viewModel()
+    val manoViewModel: ManoViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -214,7 +220,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         // MAZOS
         composable(route = "mazos_screen") {
-            _Mazos_Screen(
+            _Mazo_Screen(
                 isAdmin = isAdmin,
                 onProfileClick = vNavegarAlPerfil,
                 onNavigateBack = {
@@ -287,7 +293,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         // VOUCHERS
         composable(route = "vouchers_screen") {
-            _Vouchers_Screen(
+            _Voucher_Screen(
                 isAdmin = isAdmin,
                 onProfileClick = vNavegarAlPerfil,
                 onNavigateBack = {
@@ -354,7 +360,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         // CONSUMIBLES
         composable(route = "consumibles_screen") {
-            _Consumibles_Screen(
+            _Consumible_Screen(
                 isAdmin = isAdmin,
                 onProfileClick = vNavegarAlPerfil,
                 onNavigateBack = {
@@ -415,6 +421,78 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFF8E44AD))
+                }
+            }
+        }
+
+        composable(route = "manos_screen") {
+            _Mano_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddManoClick = { navController.navigate("add_mano") },
+                onEditManoClick = { id ->
+                    navController.navigate("edit_mano/$id")
+                },
+                onManoClick = { manoId ->
+                    navController.navigate("mano_detail/$manoId")
+                },
+                viewModel = manoViewModel
+            )
+        }
+
+        composable(route = "add_mano") {
+            _Mano_Add_Screen(
+                viewModel = manoViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_mano/{manoId}",
+            arguments = listOf(navArgument("manoId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val manoId = backStackEntry.arguments?.getString("manoId") ?: ""
+            _Mano_Edit_Screen(
+                manoId = manoId,
+                viewModel = manoViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "mano_detail/{manoId}",
+            arguments = listOf(navArgument("manoId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val manoId = backStackEntry.arguments?.getString("manoId") ?: ""
+
+            val mano = manoViewModel._Obtener_Mano_Por_ID(manoId)
+
+            if (mano != null) {
+                _Mano_Detail_Screen(
+                    mano = mano,
+                    viewModel = manoViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil,
+                    onNavigateToJoker = { idJoker ->
+                        navController.navigate("joker_detail/$idJoker")
+                    },
+                    onNavigateToConsumible = { idPlaneta ->
+                        navController.navigate("consumible_detail/$idPlaneta")
+                    }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF4A5568))
                 }
             }
         }
