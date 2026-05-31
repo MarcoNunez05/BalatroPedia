@@ -20,32 +20,32 @@ import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Search_Filter_Bar
 import com.example.balatropedia.components._Delete_Confirmation_Dialog
 import com.example.balatropedia.components._Empty_State
-import com.example.balatropedia.models.ManoViewModel
-import com.example.balatropedia.ui.theme.COLOR_MANOS_BACKGROUND
+import com.example.balatropedia.models.BoosterPackViewModel
 import com.example.balatropedia.ui.theme._BALATRO_FONT
+import com.example.balatropedia.ui.theme.COLOR_BOOSTER_BACKGROUND
 
 @Composable
-// Pantalla de visualización de Manos
-fun _Mano_Screen(
+// Pantalla de visualización de Booster Packs
+fun _BoosterPack_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
     onNavigateBack: () -> Unit,
-    onAddManoClick: () -> Unit,
-    onEditManoClick: (String) -> Unit,
-    onManoClick: (String) -> Unit,
-    viewModel: ManoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    onAddBoosterPackClick: () -> Unit,
+    onEditBoosterPackClick: (String) -> Unit,
+    onBoosterPackClick: (String) -> Unit,
+    viewModel: BoosterPackViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     var vBusqueda by remember { mutableStateOf("") }
-    val listaManos = viewModel.manos.value
+    val listaBoosterPacks = viewModel.boosterPacks.value
     val cargando = viewModel.isLoading.value
 
-    var vManoAEliminar by remember { mutableStateOf<String?>(null) }
+    var vBoosterPackAEliminar by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    val listaManosFiltrada by remember(vBusqueda, listaManos) {
+    val listaBoosterPacksFiltrada by remember(vBusqueda, listaBoosterPacks) {
         derivedStateOf {
-            listaManos.filter { mano ->
-                mano.nombre.contains(vBusqueda, ignoreCase = true)
+            listaBoosterPacks.filter { boosterPack ->
+                boosterPack.nombre.contains(vBusqueda, ignoreCase = true)
             }
         }
     }
@@ -64,11 +64,11 @@ fun _Mano_Screen(
         floatingActionButton = {
             if (isAdmin) {
                 FloatingActionButton(
-                    onClick = onAddManoClick,
-                    containerColor = COLOR_MANOS_BACKGROUND,
+                    onClick = onAddBoosterPackClick,
+                    containerColor = COLOR_BOOSTER_BACKGROUND,
                     contentColor = Color.White
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Añadir Mano")
+                    Icon(Icons.Default.Add, contentDescription = "Añadir Booster Pack")
                 }
             }
         }
@@ -81,7 +81,7 @@ fun _Mano_Screen(
             contentAlignment = Alignment.Center
         ) {
             if (cargando) {
-                CircularProgressIndicator(color = COLOR_MANOS_BACKGROUND)
+                CircularProgressIndicator(color = COLOR_BOOSTER_BACKGROUND)
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -96,7 +96,7 @@ fun _Mano_Screen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Manos de Póker",
+                                text = "Booster Packs",
                                 color = Color.White,
                                 fontSize = 30.sp,
                                 fontFamily = _BALATRO_FONT
@@ -108,7 +108,7 @@ fun _Mano_Screen(
                         _Search_Filter_Bar(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
-                            placeholderText = "Buscar Mano...",
+                            placeholderText = "Buscar Booster Pack...",
                             onFilterClick = {
                                 Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
                             }
@@ -119,26 +119,26 @@ fun _Mano_Screen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    if (listaManosFiltrada.isEmpty()) {
+                    if (listaBoosterPacksFiltrada.isEmpty()) {
                         item {
                             _Empty_State(
-                                mensaje = "No se encontraron Manos",
-                                subtitulo = if (listaManos.isEmpty())
-                                    "Aún no hay Manos registradas en la base de datos."
+                                mensaje = "No se encontraron Booster Packs",
+                                subtitulo = if (listaBoosterPacks.isEmpty())
+                                    "Aún no hay Booster Packs registrados en la base de datos."
                                 else
-                                    "No hay Manos que coincidan con tu búsqueda o filtros."
+                                    "No hay Booster Packs que coincidan con tu búsqueda."
                             )
                         }
                     } else {
-                        items(listaManosFiltrada) { mano ->
+                        items(listaBoosterPacksFiltrada) { boosterPack ->
                             _Balatro_Row_Item(
-                                nombre = mano.nombre,
-                                imageUrl = null, // Se pasa null para que la imagen no ocupe espacio
-                                backgroundColor = COLOR_MANOS_BACKGROUND,
+                                nombre = boosterPack.nombre,
+                                imageUrl = boosterPack.imagen_url,
+                                backgroundColor = COLOR_BOOSTER_BACKGROUND,
                                 isAdmin = isAdmin,
-                                onEditClick = { onEditManoClick(mano.id) },
-                                onDeleteClick = { vManoAEliminar = mano.id },
-                                onItemClick = { onManoClick(mano.id) }
+                                onEditClick = { onEditBoosterPackClick(boosterPack.id) },
+                                onDeleteClick = { vBoosterPackAEliminar = boosterPack.id },
+                                onItemClick = { onBoosterPackClick(boosterPack.id) }
                             )
                         }
                     }
@@ -151,20 +151,20 @@ fun _Mano_Screen(
         }
     }
 
-    if (vManoAEliminar != null) {
+    if (vBoosterPackAEliminar != null) {
         _Delete_Confirmation_Dialog(
-            titulo = "Eliminar Mano",
-            mensaje = "¿Estás seguro de que deseas eliminar esta mano de la base de datos?",
-            onDismiss = { vManoAEliminar = null },
+            titulo = "Eliminar Booster Pack",
+            mensaje = "¿Estás seguro de que deseas eliminar este Booster Pack de la base de datos?",
+            onDismiss = { vBoosterPackAEliminar = null },
             onConfirm = {
-                val idBorrar = vManoAEliminar
-                vManoAEliminar = null
+                val idBorrar = vBoosterPackAEliminar
+                vBoosterPackAEliminar = null
 
                 if (idBorrar != null) {
-                    viewModel._Eliminar_Mano(
+                    viewModel._Eliminar_BoosterPack(
                         id = idBorrar,
                         onSuccess = {
-                            Toast.makeText(context, "Mano eliminada", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Booster Pack eliminado", Toast.LENGTH_SHORT).show()
                         },
                         onError = { error ->
                             Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()

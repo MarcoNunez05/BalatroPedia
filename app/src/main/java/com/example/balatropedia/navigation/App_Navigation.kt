@@ -13,11 +13,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.balatropedia.models.BoosterPackViewModel
 import com.example.balatropedia.models.JokerViewModel
 import com.example.balatropedia.models.MazoViewModel
 import com.example.balatropedia.models.VoucherViewModel
 import com.example.balatropedia.models.ConsumibleViewModel
 import com.example.balatropedia.models.ManoViewModel
+import com.example.balatropedia.screens._BoosterPack_Add_Screen
+import com.example.balatropedia.screens._BoosterPack_Detail_Screen
+import com.example.balatropedia.screens._BoosterPack_Edit_Screen
+import com.example.balatropedia.screens._BoosterPack_Screen
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Joker_Screen
@@ -64,6 +69,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
     val voucherViewModel: VoucherViewModel = viewModel()
     val consumibleViewModel: ConsumibleViewModel = viewModel()
     val manoViewModel: ManoViewModel = viewModel()
+    val boosterPackViewModel: BoosterPackViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -425,6 +431,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
             }
         }
 
+        // MANOS
         composable(route = "manos_screen") {
             _Mano_Screen(
                 isAdmin = isAdmin,
@@ -486,6 +493,73 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     onNavigateToConsumible = { idPlaneta ->
                         navController.navigate("consumible_detail/$idPlaneta")
                     }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF4A5568))
+                }
+            }
+        }
+
+        // BOOSTER PACKS
+        composable(route = "boosterPacks_screen") {
+            _BoosterPack_Screen(
+                isAdmin = isAdmin,
+                onProfileClick = vNavegarAlPerfil,
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAddBoosterPackClick = { navController.navigate("add_boosterPack") },
+                onEditBoosterPackClick = { id ->
+                    navController.navigate("edit_boosterPack/$id")
+                },
+                onBoosterPackClick = { boosterPackId ->
+                    navController.navigate("boosterPack_detail/$boosterPackId")
+                },
+                viewModel = boosterPackViewModel
+            )
+        }
+
+        composable(route = "add_boosterPack") {
+            _BoosterPack_Add_Screen(
+                viewModel = boosterPackViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "edit_boosterPack/{boosterPackId}",
+            arguments = listOf(navArgument("boosterPackId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val boosterPackId = backStackEntry.arguments?.getString("boosterPackId") ?: ""
+            _BoosterPack_Edit_Screen(
+                boosterPackId = boosterPackId,
+                viewModel = boosterPackViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onProfileClick = vNavegarAlPerfil
+            )
+        }
+
+        composable(
+            route = "boosterPack_detail/{boosterPackId}",
+            arguments = listOf(navArgument("boosterPackId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val boosterPackId = backStackEntry.arguments?.getString("boosterPackId") ?: ""
+
+            val boosterPack = boosterPackViewModel._Obtener_BoosterPack_Por_ID(boosterPackId)
+
+            if (boosterPack != null) {
+                _BoosterPack_Detail_Screen(
+                    boosterPack = boosterPack,
+                    viewModel = boosterPackViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onProfileClick = vNavegarAlPerfil
                 )
             } else {
                 Box(

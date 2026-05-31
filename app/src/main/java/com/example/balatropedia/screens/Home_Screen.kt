@@ -68,11 +68,11 @@ fun _Home_Screen(
                 COLOR_CONSUMIBLES_BACKGROUND, COLOR_CONSUMIBLES_TEXT, "consumibles"),
             CategoryData("Manos", R.drawable.main_manos, COLOR_MANOS_BACKGROUND, COLOR_MANOS_TEXT, "manos"),
             CategoryData("Booster Packs", R.drawable.main_booster,
-                COLOR_BOOSTER_BACKGROUND, COLOR_BOOSTER_TEXT, "booster"),
+                COLOR_BOOSTER_BACKGROUND, COLOR_BOOSTER_TEXT, "boosterPacks"),
             CategoryData("Blinds", R.drawable.main_blind,
-                COLOR_BLINDS_BACKGROUND, COLOR_BLINDS_TEXT, "booster"),
+                COLOR_BLINDS_BACKGROUND, COLOR_BLINDS_TEXT, "blinds"),
             CategoryData("Challenges", R.drawable.main_challenge,
-                COLOR_CHALLENGES_BACKGROUND, COLOR_CHALLENGES_TEXT, "booster")
+                COLOR_CHALLENGES_BACKGROUND, COLOR_CHALLENGES_TEXT, "challenges")
         )
     }
 
@@ -115,7 +115,7 @@ fun _Home_Screen(
                     backgroundColor = category.BACKGROUND_COLOR,
                     textColor = category.TEXT_COLOR,
                     onClick = {
-                        onCategoryClick(category.TEXT.lowercase())
+                        onCategoryClick(category.ID)
                     }
                 )
             }

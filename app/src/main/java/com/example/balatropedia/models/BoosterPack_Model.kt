@@ -120,6 +120,7 @@ class BoosterPackViewModel : ViewModel() {
     fun _Añadir_Nuevo_BoosterPack(
         nombre: String,
         descripcion: String,
+        imagenUrl: String,
         costoBase: Int,
         cartasDisponibles: Int,
         cartasElegibles: Int,
@@ -139,6 +140,7 @@ class BoosterPackViewModel : ViewModel() {
                         "id" to documentId,
                         "nombre" to nombre,
                         "descripcion" to descripcion,
+                        "imagen_url" to imagenUrl,
                         "costo_base" to costoBase,
                         "cartas_disponibles" to cartasDisponibles,
                         "cartas_elegibles" to cartasElegibles,
@@ -159,6 +161,7 @@ class BoosterPackViewModel : ViewModel() {
         id: String,
         nombre: String,
         descripcion: String,
+        imagenUrl: String,
         costoBase: Int,
         cartasDisponibles: Int,
         cartasElegibles: Int,
@@ -168,6 +171,7 @@ class BoosterPackViewModel : ViewModel() {
         val datosActualizados = hashMapOf(
             "nombre" to nombre,
             "descripcion" to descripcion,
+            "imagen_url" to imagenUrl,
             "costo_base" to costoBase,
             "cartas_disponibles" to cartasDisponibles,
             "cartas_elegibles" to cartasElegibles
