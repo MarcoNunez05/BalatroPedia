@@ -109,9 +109,7 @@ fun _Challenge_Screen(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
                             placeholderText = "Buscar Challenge...",
-                            onFilterClick = {
-                                Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
-                            }
+                            showFilterButton = false
                         )
                     }
 

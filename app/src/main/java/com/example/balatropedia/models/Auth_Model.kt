@@ -123,6 +123,12 @@ class AuthViewModel : ViewModel() {
             return
         }
 
+        if (username.isEmpty())
+        {
+            onError("El nombre no debe estar vacío.")
+            return
+        }
+
         if (pass.isNotEmpty() || confirmPass.isNotEmpty()) {
             if (pass != confirmPass) {
                 onError("Las contraseñas nuevas no coinciden.")

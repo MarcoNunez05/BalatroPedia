@@ -109,9 +109,7 @@ fun _Voucher_Screen(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
                             placeholderText = "Buscar Voucher...",
-                            onFilterClick = {
-                                Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
-                            }
+                            showFilterButton = false
                         )
                     }
 

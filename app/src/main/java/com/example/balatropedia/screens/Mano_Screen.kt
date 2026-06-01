@@ -109,9 +109,7 @@ fun _Mano_Screen(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
                             placeholderText = "Buscar Mano...",
-                            onFilterClick = {
-                                Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
-                            }
+                            showFilterButton = false
                         )
                     }
 

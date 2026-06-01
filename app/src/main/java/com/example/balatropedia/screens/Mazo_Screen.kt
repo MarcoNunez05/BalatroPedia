@@ -109,9 +109,7 @@ fun _Mazo_Screen(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
                             placeholderText = "Buscar Mazo...",
-                            onFilterClick = {
-                                Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
-                            }
+                            showFilterButton = false
                         )
                     }
 

@@ -117,9 +117,7 @@ fun _Consumible_Screen(
                             searchQuery = vBusqueda,
                             onSearchQueryChange = { vBusqueda = it },
                             placeholderText = "Buscar en ${tabs[selectedTabIndex]}...",
-                            onFilterClick = {
-                                Toast.makeText(context, "Filtros próximamente", Toast.LENGTH_SHORT).show()
-                            }
+                            showFilterButton = false
                         )
                     }
 

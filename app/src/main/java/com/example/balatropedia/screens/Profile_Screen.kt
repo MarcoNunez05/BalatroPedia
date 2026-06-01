@@ -15,13 +15,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Balatropedia_Header
 import com.example.balatropedia.components._Profile_Menu_Button
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 @Composable
+// Pantalla del perfil de usuario
 fun _Profile_Screen(
     isAdmin: Boolean,
     onNavigateBack: () -> Unit,
@@ -31,22 +34,24 @@ fun _Profile_Screen(
     onNavigateToConfig: () -> Unit
 ) {
     val auth = remember { FirebaseAuth.getInstance() }
+    val scope = rememberCoroutineScope()
     val db = remember { FirebaseFirestore.getInstance() }
 
-    var username by remember { mutableStateOf("Cargando...") }
+    var vUsername by remember { mutableStateOf("Cargando...") }
+    var vIsLoggingOut by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val uid = auth.currentUser?.uid
         if (uid != null) {
             db.collection("users").document(uid).get()
                 .addOnSuccessListener { doc ->
-                    username = doc.getString("username") ?: if (isAdmin) "Admin" else "Usuario"
+                    vUsername = doc.getString("username") ?: if (isAdmin) "Admin" else "Usuario"
                 }
                 .addOnFailureListener {
-                    username = if (isAdmin) "Admin" else "Usuario"
+                    vUsername = if (isAdmin) "Admin" else "Usuario"
                 }
         } else {
-            username = "Invitado"
+            vUsername = "Invitado"
         }
     }
 
@@ -80,7 +85,7 @@ fun _Profile_Screen(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "\"$username\"",
+                    text = "\"$vUsername\"",
                     color = Color.White,
                     fontSize = 32.sp,
                     fontFamily = _BALATRO_FONT,
@@ -89,42 +94,34 @@ fun _Profile_Screen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
-                    onClick = onNavigateToConfig,
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00BCD4)),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Text(
-                        text = "Configurar cuenta",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                }
+                _Balatro_Primary_Button(
+                    text = "Configurar cuenta",
+                    isLoading = false,
+                    color = Color(0xFF00BCD4),
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    onClick = onNavigateToConfig
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                _Balatro_Primary_Button(
+                    text = "Cerrar sesión",
+                    isLoading = vIsLoggingOut,
+                    color = Color(0xFFCC1D1D),
+                    modifier = Modifier.fillMaxWidth(0.9f),
                     onClick = {
-                        auth.signOut()
-                        onLogoutSuccess()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC1D1D)),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Text(
-                        text = "Cerrar sesión",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                }
+                        vIsLoggingOut = true
+
+                        scope.launch {
+                            auth.signOut()
+
+                            kotlinx.coroutines.delay(500)
+
+                            vIsLoggingOut = false
+                            onLogoutSuccess()
+                        }
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))

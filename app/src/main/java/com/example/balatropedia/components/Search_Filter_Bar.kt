@@ -30,7 +30,8 @@ fun _Search_Filter_Bar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     placeholderText: String = "Buscar...",
-    onFilterClick: () -> Unit
+    showFilterButton: Boolean = true,
+    onFilterClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -59,14 +60,16 @@ fun _Search_Filter_Bar(
             singleLine = true
         )
 
-        Icon(
-            imageVector = Icons.Default.FilterList,
-            contentDescription = "Filtrar",
-            tint = Color.White,
-            modifier = Modifier
-                .size(30.dp)
-                .clickable { onFilterClick() }
-        )
+        if (showFilterButton) {
+            Icon(
+                imageVector = Icons.Default.FilterList,
+                contentDescription = "Filtrar",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(30.dp)
+                    .clickable { onFilterClick() }
+            )
+        }
     }
 }
 
