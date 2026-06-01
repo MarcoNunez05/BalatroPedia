@@ -99,4 +99,6 @@ dependencies {
     // Vico (Gráficos)
     implementation("com.patrykandpatrick.vico:compose:1.13.0")
     implementation("com.patrykandpatrick.vico:compose-m3:1.13.0")
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
