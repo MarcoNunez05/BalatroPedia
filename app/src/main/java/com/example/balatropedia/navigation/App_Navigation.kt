@@ -59,6 +59,7 @@ import com.example.balatropedia.screens._Mano_Detail_Screen
 import com.example.balatropedia.screens._Mano_Edit_Screen
 import com.example.balatropedia.screens._Mano_Screen
 import com.example.balatropedia.screens._User_Ratings_Screen
+import com.example.balatropedia.screens._Admin_Metrics_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 // Función que controla la navegación de la app
@@ -782,6 +783,17 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     CircularProgressIndicator(color = Color(0xFF2E8B57))
                 }
             }
+        }
+
+        composable(route = "metrics_screen") {
+            _Admin_Metrics_Screen(
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onProfileClick = vNavegarAlPerfil
+            )
         }
     }
 }
