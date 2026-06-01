@@ -86,7 +86,7 @@ fun _Admin_Metrics_Screen(
                 fontFamily = _BALATRO_FONT,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             Button(
                 onClick = {
                     vIsRecalculating = true

@@ -94,8 +94,9 @@ fun _Login_Screen(
                     Text(
                         text = msg,
                         color = Color(0xFFE57373),
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(top = 16.dp)
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(top = 16.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
 
@@ -106,17 +107,38 @@ fun _Login_Screen(
                     isLoading = vIsLoading,
                     color = Color(0xFF1BA345),
                     onClick = {
-                        viewModel._Iniciar_Sesion(
-                            email = email,
-                            pass = password,
-                            onSuccess = onLoginSuccess
-                        )
+                        when {
+                            email.isBlank() -> {
+                                vErrorMessage = "El correo electrónico no puede estar vacío."
+                            }
+                            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                                vErrorMessage = "Por favor, introduce un correo válido."
+                            }
+                            password.isBlank() -> {
+                                vErrorMessage = "La contraseña no puede estar vacía."
+                            }
+                            else -> {
+                                vIsLoading = true
+                                vErrorMessage = null
 
+                                viewModel._Iniciar_Sesion(
+                                    email = email,
+                                    pass = password,
+                                    onSuccess = {
+                                        vIsLoading = false
+                                        onLoginSuccess()
+                                    },
+                                    onError = { errorText ->
+                                        vIsLoading = false
+                                        vErrorMessage = errorText
+                                    }
+                                )
+                            }
+                        }
                     }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-
 
                 val textoRegistro = buildAnnotatedString {
                     withStyle(style = SpanStyle(color = Color.White, fontSize = 20.sp, fontFamily = _BALATRO_FONT)) { append("¿No tienes una cuenta? ") }

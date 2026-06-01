@@ -1,11 +1,14 @@
 package com.example.balatropedia.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
@@ -17,24 +20,37 @@ class AuthViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    fun _Iniciar_Sesion(email: String, pass: String, onSuccess: () -> Unit) {
+    fun _Iniciar_Sesion(
+        email: String,
+        pass: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         if (email.isBlank() || pass.isBlank()) {
-            _errorMessage.value = "Por favor, llena todos los campos."
+            val errorCampos = "Por favor, llena todos los campos."
+            _errorMessage.value = errorCampos
+            onError(errorCampos)
             return
         }
 
         _isLoading.value = true
         _errorMessage.value = null
 
-        auth.signInWithEmailAndPassword(email.trim(), pass.trim())
-            .addOnCompleteListener { task ->
+        viewModelScope.launch {
+            try {
+                auth.signInWithEmailAndPassword(email.trim(), pass.trim()).await()
+
                 _isLoading.value = false
-                if (task.isSuccessful) {
-                    onSuccess()
-                } else {
-                    _errorMessage.value = task.exception?.localizedMessage ?: "Error al iniciar sesión"
-                }
+                onSuccess()
+
+            } catch (e: Exception) {
+                _isLoading.value = false
+                val errorFirebase = e.localizedMessage ?: "Error al iniciar sesión"
+
+                _errorMessage.value = errorFirebase
+                onError(errorFirebase)
             }
+        }
     }
 
     fun _Registrar_Usuario(
@@ -44,20 +60,25 @@ class AuthViewModel : ViewModel() {
         confirmPass: String,
         pais: String,
         edad: String,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         if (pass != confirmPass) {
-            _errorMessage.value = "Las contraseñas no coinciden"
+            val errorMsg = "Las contraseñas no coinciden"
+            _errorMessage.value = errorMsg
+            onError(errorMsg)
             return
         }
 
-        _isLoading.value = true
-        _errorMessage.value = null
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
 
-        auth.createUserWithEmailAndPassword(email.trim(), pass.trim())
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val userId = auth.currentUser?.uid
+            try {
+                val authResult = auth.createUserWithEmailAndPassword(email.trim(), pass.trim()).await()
+                val userId = authResult.user?.uid
+
+                if (userId != null) {
                     val userProfile = hashMapOf(
                         "username" to username.trim(),
                         "email" to email.trim(),
@@ -66,23 +87,25 @@ class AuthViewModel : ViewModel() {
                         "rol" to "user"
                     )
 
-                    if (userId != null) {
-                        db.collection("users").document(userId)
-                            .set(userProfile)
-                            .addOnSuccessListener {
-                                _isLoading.value = false
-                                onSuccess()
-                            }
-                            .addOnFailureListener { e ->
-                                _isLoading.value = false
-                                _errorMessage.value = "Error al guardar perfil: ${e.message}"
-                            }
-                    }
-                } else {
+                    db.collection("users").document(userId)
+                        .set(userProfile)
+                        .await()
+
                     _isLoading.value = false
-                    _errorMessage.value = task.exception?.localizedMessage ?: "Error al registrar"
+                    onSuccess()
+                } else {
+                    throw Exception("No se pudo obtener el ID del usuario creado.")
                 }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _isLoading.value = false
+
+                val errorMsg = e.localizedMessage ?: "Error al registrar el usuario"
+                _errorMessage.value = errorMsg
+                onError(errorMsg)
             }
+        }
     }
 
     fun _Actualizar_Usuario(

@@ -106,10 +106,41 @@ fun _Register_Screen(
                 text = "Registrarse",
                 isLoading = vIsLoading,
                 onClick = {
-                    viewModel._Registrar_Usuario(
-                        vUsername, vEmail, vPassword, vConfirmPassword, vPais, vEdad,
-                        onSuccess = onRegisterSuccess
-                    )
+                    when {
+                        vUsername.isBlank() -> {
+                            vErrorMessage = "El nombre de usuario no puede estar vacío."
+                        }
+                        vEmail.isBlank() -> {
+                            vErrorMessage = "El correo electrónico no puede estar vacío."
+                        }
+                        !android.util.Patterns.EMAIL_ADDRESS.matcher(vEmail).matches() -> {
+                            vErrorMessage = "Por favor, introduce un correo electrónico válido."
+                        }
+                        vPassword.isBlank() -> {
+                            vErrorMessage = "La contraseña no puede estar vacía."
+                        }
+                        vPassword != vConfirmPassword -> {
+                            vErrorMessage = "Las contraseñas no coinciden."
+                        }
+                        vPais == "Selecciona un país" -> {
+                            vErrorMessage = "Por favor, selecciona tu país."
+                        }
+                        else -> {
+                            vIsLoading = true
+                            vErrorMessage = null
+                            viewModel._Registrar_Usuario(
+                                vUsername, vEmail, vPassword, vConfirmPassword, vPais, vEdad,
+                                onSuccess = {
+                                    vIsLoading = false
+                                    onRegisterSuccess()
+                                },
+                                onError = { error ->
+                                    vIsLoading = false
+                                    vErrorMessage = error
+                                }
+                            )
+                        }
+                    }
                 }
             )
 

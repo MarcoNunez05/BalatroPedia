@@ -173,7 +173,7 @@ fun _User_Ratings_Screen(
                             _Empty_State(
                                 mensaje = "No se encontraron puntuaciones",
                                 subtitulo = if (vRatingsList.isEmpty())
-                                    "Aún no has puntuado ninguna carta. ¡Ve a explorar la wiki!"
+                                    "Aún no has puntuado ningún elemento. ¡Ve a explorar la wiki!"
                                 else
                                     "No hay puntuaciones que coincidan con tu búsqueda o filtros."
                             )

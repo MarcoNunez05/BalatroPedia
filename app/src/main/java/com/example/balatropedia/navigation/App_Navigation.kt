@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.balatropedia.components.navigateSafe
 import com.example.balatropedia.models.BlindViewModel
 import com.example.balatropedia.models.BoosterPackViewModel
 import com.example.balatropedia.models.ChallengeViewModel
@@ -71,9 +72,9 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
     val vNavegarAlPerfil: () -> Unit = {
         if (auth.currentUser != null) {
-            navController.navigate("profile_screen")
+            navController.navigateSafe("profile_screen")
         } else {
-            navController.navigate("login")
+            navController.navigateSafe("login")
         }
     }
 
@@ -96,14 +97,14 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                 onProfileClick = vNavegarAlPerfil,
                 onCategoryClick = { categoria ->
                     when (categoria) {
-                        "jokers" -> navController.navigate("jokers_screen")
-                        "vouchers" -> navController.navigate("vouchers_screen")
-                        "mazos" -> navController.navigate("mazos_screen")
-                        "consumibles" -> navController.navigate("consumibles_screen")
-                        "manos" -> navController.navigate("manos_screen")
-                        "boosterPacks" -> navController.navigate("boosterPacks_screen")
-                        "blinds" -> navController.navigate("blinds_screen")
-                        "challenges" -> navController.navigate("challenges_screen")
+                        "jokers" -> navController.navigateSafe("jokers_screen")
+                        "vouchers" -> navController.navigateSafe("vouchers_screen")
+                        "mazos" -> navController.navigateSafe("mazos_screen")
+                        "consumibles" -> navController.navigateSafe("consumibles_screen")
+                        "manos" -> navController.navigateSafe("manos_screen")
+                        "boosterPacks" -> navController.navigateSafe("boosterPacks_screen")
+                        "blinds" -> navController.navigateSafe("blinds_screen")
+                        "challenges" -> navController.navigateSafe("challenges_screen")
                     }
                 }
             )
@@ -118,12 +119,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     }
                 },
                 onLoginSuccess = {
-                    navController.navigate("Home") {
+                    navController.navigateSafe("Home") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 onRegisterClick = {
-                    navController.navigate("register")
+                    navController.navigateSafe("register")
                 }
             )
         }
@@ -136,7 +137,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     }
                 },
                 onRegisterSuccess = {
-                    navController.navigate("Home") {
+                    navController.navigateSafe("Home") {
                         popUpTo("register") { inclusive = true }
                     }
                 }
@@ -153,19 +154,19 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     }
                 },
                 onLogoutSuccess = {
-                    navController.navigate("Home") {
+                    navController.navigateSafe("Home") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 },
 
                 onNavigateToConfig = {
-                    navController.navigate("config_account_screen")
+                    navController.navigateSafe("config_account_screen")
                 },
                 onNavigateToRatings = {
-                    navController.navigate("user_ratings_screen")
+                    navController.navigateSafe("user_ratings_screen")
                 },
                 onNavigateToMetrics = {
-                    navController.navigate("metrics_screen")
+                    navController.navigateSafe("metrics_screen")
                 }
             )
         }
@@ -178,7 +179,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     }
                 },
                 onAccountDeleted = {
-                    navController.navigate("Home") {
+                    navController.navigateSafe("Home") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
@@ -195,14 +196,14 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                 onProfileClick = vNavegarAlPerfil,
                 onItemClick = { categoria, id ->
                     when (categoria) {
-                        "jokers" -> navController.navigate("joker_detail/$id")
-                        "vouchers" -> navController.navigate("voucher_detail/$id")
-                        "mazos" -> navController.navigate("mazo_detail/$id")
-                        "consumibles" -> navController.navigate("consumible_detail/$id")
-                        "manos" -> navController.navigate("mano_detail/$id")
-                        "boosterPacks" -> navController.navigate("boosterPack_detail/$id")
-                        "blinds" -> navController.navigate("blind_detail/$id")
-                        "challenges" -> navController.navigate("challenges_detail/$id")
+                        "jokers" -> navController.navigateSafe("joker_detail/$id")
+                        "vouchers" -> navController.navigateSafe("voucher_detail/$id")
+                        "mazos" -> navController.navigateSafe("mazo_detail/$id")
+                        "consumibles" -> navController.navigateSafe("consumible_detail/$id")
+                        "manos" -> navController.navigateSafe("mano_detail/$id")
+                        "boosterPacks" -> navController.navigateSafe("boosterPack_detail/$id")
+                        "blinds" -> navController.navigateSafe("blind_detail/$id")
+                        "challenges" -> navController.navigateSafe("challenges_detail/$id")
                     }
                 }
             )
@@ -218,12 +219,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddJokerClick = { navController.navigate("add_joker") },
+                onAddJokerClick = { navController.navigateSafe("add_joker") },
                 onJokerClick = { jokerid ->
-                    navController.navigate("joker_detail/$jokerid")
+                    navController.navigateSafe("joker_detail/$jokerid")
                 },
                 onEditJokerClick = { id ->
-                    navController.navigate("edit_joker/$id")
+                    navController.navigateSafe("edit_joker/$id")
                 },
                 viewModel = jokerViewModel
             )
@@ -273,10 +274,10 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     },
                     onProfileClick = vNavegarAlPerfil,
                     onNavigateToJoker = { idJoker ->
-                        navController.navigate("joker_detail/$idJoker")
+                        navController.navigateSafe("joker_detail/$idJoker")
                     },
                     onNavigateToConsumible = { idConsumible ->
-                        navController.navigate("consumible_detail/$idConsumible")
+                        navController.navigateSafe("consumible_detail/$idConsumible")
                     }
                 )
             } else {
@@ -299,12 +300,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddMazoClick = { navController.navigate("add_mazo") },
+                onAddMazoClick = { navController.navigateSafe("add_mazo") },
                 onEditMazoClick = { id ->
-                    navController.navigate("edit_mazo/$id")
+                    navController.navigateSafe("edit_mazo/$id")
                 },
                 onMazoClick = { mazoId ->
-                    navController.navigate("mazo_detail/$mazoId")
+                    navController.navigateSafe("mazo_detail/$mazoId")
                 },
                 viewModel = mazoViewModel
             )
@@ -346,10 +347,10 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     onNavigateBack = { navController.popBackStack() },
                     onProfileClick = vNavegarAlPerfil,
                     onNavigateToVoucher = { idVoucher ->
-                        navController.navigate("voucher_detail/$idVoucher")
+                        navController.navigateSafe("voucher_detail/$idVoucher")
                     },
                     onNavigateToConsumible = { idConsumible ->
-                        navController.navigate("consumible_detail/$idConsumible")
+                        navController.navigateSafe("consumible_detail/$idConsumible")
                     }
                 )
             } else {
@@ -372,12 +373,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddVoucherClick = { navController.navigate("add_voucher") },
+                onAddVoucherClick = { navController.navigateSafe("add_voucher") },
                 onEditVoucherClick = { id ->
-                    navController.navigate("edit_voucher/$id")
+                    navController.navigateSafe("edit_voucher/$id")
                 },
                 onVoucherClick = { voucherId ->
-                    navController.navigate("voucher_detail/$voucherId")
+                    navController.navigateSafe("voucher_detail/$voucherId")
                 },
                 viewModel = voucherViewModel
             )
@@ -439,12 +440,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddConsumibleClick = { navController.navigate("add_consumible") },
+                onAddConsumibleClick = { navController.navigateSafe("add_consumible") },
                 onEditConsumibleClick = { id ->
-                    navController.navigate("edit_consumible/$id")
+                    navController.navigateSafe("edit_consumible/$id")
                 },
                 onConsumibleClick = { consumibleId ->
-                    navController.navigate("consumible_detail/$consumibleId")
+                    navController.navigateSafe("consumible_detail/$consumibleId")
                 },
                 viewModel = consumibleViewModel
             )
@@ -486,7 +487,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     onNavigateBack = { navController.popBackStack() },
                     onProfileClick = vNavegarAlPerfil,
                     onNavigateToBoosterPack = { idBoosterPack ->
-                        navController.navigate("boosterPack_detail/$idBoosterPack")
+                        navController.navigateSafe("boosterPack_detail/$idBoosterPack")
                     }
                 )
             } else {
@@ -509,12 +510,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddManoClick = { navController.navigate("add_mano") },
+                onAddManoClick = { navController.navigateSafe("add_mano") },
                 onEditManoClick = { id ->
-                    navController.navigate("edit_mano/$id")
+                    navController.navigateSafe("edit_mano/$id")
                 },
                 onManoClick = { manoId ->
-                    navController.navigate("mano_detail/$manoId")
+                    navController.navigateSafe("mano_detail/$manoId")
                 },
                 viewModel = manoViewModel
             )
@@ -556,10 +557,10 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     onNavigateBack = { navController.popBackStack() },
                     onProfileClick = vNavegarAlPerfil,
                     onNavigateToJoker = { idJoker ->
-                        navController.navigate("joker_detail/$idJoker")
+                        navController.navigateSafe("joker_detail/$idJoker")
                     },
                     onNavigateToConsumible = { idPlaneta ->
-                        navController.navigate("consumible_detail/$idPlaneta")
+                        navController.navigateSafe("consumible_detail/$idPlaneta")
                     }
                 )
             } else {
@@ -582,12 +583,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddBoosterPackClick = { navController.navigate("add_boosterPack") },
+                onAddBoosterPackClick = { navController.navigateSafe("add_boosterPack") },
                 onEditBoosterPackClick = { id ->
-                    navController.navigate("edit_boosterPack/$id")
+                    navController.navigateSafe("edit_boosterPack/$id")
                 },
                 onBoosterPackClick = { boosterPackId ->
-                    navController.navigate("boosterPack_detail/$boosterPackId")
+                    navController.navigateSafe("boosterPack_detail/$boosterPackId")
                 },
                 viewModel = boosterPackViewModel
             )
@@ -649,12 +650,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddBlindClick = { navController.navigate("add_blind") },
+                onAddBlindClick = { navController.navigateSafe("add_blind") },
                 onEditBlindClick = { id ->
-                    navController.navigate("edit_blind/$id")
+                    navController.navigateSafe("edit_blind/$id")
                 },
                 onBlindClick = { blindId ->
-                    navController.navigate("blind_detail/$blindId")
+                    navController.navigateSafe("blind_detail/$blindId")
                 },
                 viewModel = blindViewModel
             )
@@ -696,7 +697,7 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     onNavigateBack = { navController.popBackStack() },
                     onProfileClick = vNavegarAlPerfil,
                     onNavigateToJoker = { idJoker ->
-                        navController.navigate("joker_detail/$idJoker")
+                        navController.navigateSafe("joker_detail/$idJoker")
                     }
                 )
             } else {
@@ -719,12 +720,12 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                         navController.popBackStack()
                     }
                 },
-                onAddChallengeClick = { navController.navigate("add_challenge") },
+                onAddChallengeClick = { navController.navigateSafe("add_challenge") },
                 onEditChallengeClick = { id ->
-                    navController.navigate("edit_challenge/$id")
+                    navController.navigateSafe("edit_challenge/$id")
                 },
                 onChallengeClick = { challengeId ->
-                    navController.navigate("challenge_detail/$challengeId")
+                    navController.navigateSafe("challenge_detail/$challengeId")
                 },
                 viewModel = challengeViewModel
             )
@@ -766,13 +767,13 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     onNavigateBack = { navController.popBackStack() },
                     onProfileClick = vNavegarAlPerfil,
                     onNavigateToJoker = { idJoker ->
-                        navController.navigate("joker_detail/$idJoker")
+                        navController.navigateSafe("joker_detail/$idJoker")
                     },
                     onNavigateToConsumible = { idConsumible ->
-                        navController.navigate("consumible_detail/$idConsumible")
+                        navController.navigateSafe("consumible_detail/$idConsumible")
                     },
                     onNavigateToVoucher = { idVoucher ->
-                        navController.navigate("voucher_detail/$idVoucher")
+                        navController.navigateSafe("voucher_detail/$idVoucher")
                     }
                 )
             } else {
