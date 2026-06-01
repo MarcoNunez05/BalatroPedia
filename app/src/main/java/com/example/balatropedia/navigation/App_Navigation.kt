@@ -33,6 +33,7 @@ import com.example.balatropedia.screens._Challenge_Add_Screen
 import com.example.balatropedia.screens._Challenge_Detail_Screen
 import com.example.balatropedia.screens._Challenge_Edit_Screen
 import com.example.balatropedia.screens._Challenge_Screen
+import com.example.balatropedia.screens._Config_Account_Screen
 import com.example.balatropedia.screens._Joker_Detail_Screen
 import com.example.balatropedia.screens._Home_Screen
 import com.example.balatropedia.screens._Joker_Screen
@@ -57,6 +58,7 @@ import com.example.balatropedia.screens._Mano_Add_Screen
 import com.example.balatropedia.screens._Mano_Detail_Screen
 import com.example.balatropedia.screens._Mano_Edit_Screen
 import com.example.balatropedia.screens._Mano_Screen
+import com.example.balatropedia.screens._User_Ratings_Screen
 import com.google.firebase.auth.FirebaseAuth
 
 // Función que controla la navegación de la app
@@ -142,6 +144,8 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
         composable(route = "profile_screen") {
             _Profile_Screen(
+                isAdmin = isAdmin,
+
                 onNavigateBack = {
                     if (navController.previousBackStackEntry != null) {
                         navController.popBackStack()
@@ -150,6 +154,54 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                 onLogoutSuccess = {
                     navController.navigate("Home") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                },
+
+                onNavigateToConfig = {
+                    navController.navigate("config_account_screen")
+                },
+                onNavigateToRatings = {
+                    navController.navigate("user_ratings_screen")
+                },
+                onNavigateToMetrics = {
+                    navController.navigate("metrics_screen")
+                }
+            )
+        }
+
+        composable(route = "config_account_screen") {
+            _Config_Account_Screen(
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onAccountDeleted = {
+                    navController.navigate("Home") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = "user_ratings_screen") {
+            _User_Ratings_Screen(
+                onNavigateBack = {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                },
+                onProfileClick = vNavegarAlPerfil,
+                onItemClick = { categoria, id ->
+                    when (categoria) {
+                        "jokers" -> navController.navigate("joker_detail/$id")
+                        "vouchers" -> navController.navigate("voucher_detail/$id")
+                        "mazos" -> navController.navigate("mazo_detail/$id")
+                        "consumibles" -> navController.navigate("consumible_detail/$id")
+                        "manos" -> navController.navigate("mano_detail/$id")
+                        "boosterPacks" -> navController.navigate("boosterPack_detail/$id")
+                        "blinds" -> navController.navigate("blind_detail/$id")
+                        "challenges" -> navController.navigate("challenges_detail/$id")
                     }
                 }
             )
@@ -431,7 +483,10 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
                     consumible = consumible,
                     viewModel = consumibleViewModel,
                     onNavigateBack = { navController.popBackStack() },
-                    onProfileClick = vNavegarAlPerfil
+                    onProfileClick = vNavegarAlPerfil,
+                    onNavigateToBoosterPack = { idBoosterPack ->
+                        navController.navigate("boosterPack_detail/$idBoosterPack")
+                    }
                 )
             } else {
                 Box(

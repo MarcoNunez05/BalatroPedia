@@ -24,6 +24,7 @@ import com.example.balatropedia.R
 import com.example.balatropedia.class_models.ConsumibleModel
 import com.example.balatropedia.components.*
 import com.example.balatropedia.models.ConsumibleViewModel
+import com.example.balatropedia.ui.theme.COLOR_BOOSTER_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_CONSUMIBLES_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_STAR
 import com.example.balatropedia.ui.theme._BALATRO_FONT
@@ -35,7 +36,8 @@ fun _Consumible_Detail_Screen(
     consumible: ConsumibleModel,
     viewModel: ConsumibleViewModel,
     onNavigateBack: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onNavigateToBoosterPack: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -175,8 +177,8 @@ fun _Consumible_Detail_Screen(
                     _Related_Section(
                         titulo = "Se encuentra en:",
                         sinergias = consumible.boosterPack,
-                        itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND.copy(alpha = 0.2f),
-                        onItemClick = {  }
+                        itemBackgroundColor = COLOR_BOOSTER_BACKGROUND,
+                        onItemClick = { id -> onNavigateToBoosterPack(id)}
                     )
                 }
             }
