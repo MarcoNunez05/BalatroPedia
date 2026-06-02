@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.sp
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 
 @Composable
+// Texto a mostrar cuando no se encuentren documentos
 fun _Empty_State(
     mensaje: String,
     subtitulo: String = "Aún no hay información en la base de datos."

@@ -3,6 +3,7 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.ManoModel
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,8 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class ManoViewModel : ViewModel() {
@@ -25,6 +28,15 @@ class ManoViewModel : ViewModel() {
     private val _puntuacionActual = mutableStateOf(0.0)
     val puntuacionActual: State<Double> = _puntuacionActual
 
+    private val _jokersValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val jokersValidados: State<List<Map<String, String>>> = _jokersValidados
+
+    private val _cartasPlanetaValidadas = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val cartasPlanetaValidadas: State<List<Map<String, String>>> = _cartasPlanetaValidadas
+
+    private val _cargandoRelaciones = mutableStateOf(true)
+    val cargandoRelaciones: State<Boolean> = _cargandoRelaciones
+
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerManos: ListenerRegistration? = null
     private var vListenerJokers: ListenerRegistration? = null
@@ -39,6 +51,30 @@ class ManoViewModel : ViewModel() {
     init {
         _Obtener_Manos_De_Firebase()
         _Cargar_Listas_Selector()
+    }
+
+    fun _Validar_Relaciones(mano: ManoModel) {
+        viewModelScope.launch {
+            _cargandoRelaciones.value = true
+
+            try {
+                _jokersValidados.value = mano.jokersAfectados.filter { mapaJoker ->
+                    val idJoker = mapaJoker["id"] ?: return@filter false
+                    db.collection("jokers").document(idJoker).get().await().exists()
+                }
+
+                _cartasPlanetaValidadas.value = mano.cartaPlaneta.filter { mapaPlaneta ->
+                    val idPlaneta = mapaPlaneta["id"] ?: return@filter false
+                    db.collection("consumibles").document(idPlaneta).get().await().exists()
+                }
+            } catch (e: Exception) {
+                _jokersValidados.value = emptyList()
+                _cartasPlanetaValidadas.value = emptyList()
+                println("ManoViewModel - Error al validar relaciones: ${e.message}")
+            } finally {
+                _cargandoRelaciones.value = false
+            }
+        }
     }
 
     fun _Obtener_Manos_De_Firebase() {

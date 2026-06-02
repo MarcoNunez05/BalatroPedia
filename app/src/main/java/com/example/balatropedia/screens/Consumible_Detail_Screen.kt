@@ -49,9 +49,13 @@ fun _Consumible_Detail_Screen(
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
     val currentPuntuacion by viewModel.puntuacionActual
+    val boostersValidados by viewModel.boostersValidados
+    val cargandoRelaciones by viewModel.cargandoRelaciones
 
     DisposableEffect(consumible.id) {
         viewModel._Iniciar_Listener_Puntuacion(consumible.id, consumible.puntuacion_usuarios)
+        viewModel._Validar_Relaciones(consumible)
+
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
         }
@@ -156,30 +160,37 @@ fun _Consumible_Detail_Screen(
 
             // BOOSTER PACKS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (consumible.boosterPack.isEmpty()) {
-                    Text(
-                        text = "Se encuentra en:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Esta carta no aparece en sobres específicos.",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Se encuentra en:",
-                        sinergias = consumible.boosterPack,
-                        itemBackgroundColor = COLOR_BOOSTER_BACKGROUND,
-                        onItemClick = { id -> onNavigateToBoosterPack(id)}
-                    )
+                    if (boostersValidados.isEmpty()) {
+                        Text(
+                            text = "Se encuentra en:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Esta carta no aparece en sobres específicos.",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Se encuentra en:",
+                            sinergias = boostersValidados,
+                            itemBackgroundColor = COLOR_BOOSTER_BACKGROUND,
+                            onItemClick = { id -> onNavigateToBoosterPack(id)}
+                        )
+                    }
                 }
             }
 

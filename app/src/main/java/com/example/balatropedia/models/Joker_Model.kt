@@ -3,6 +3,7 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.JokerModel
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,8 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class JokerViewModel : ViewModel() {
@@ -24,6 +27,15 @@ class JokerViewModel : ViewModel() {
 
     private val _puntuacionActual = mutableStateOf(0.0)
     val puntuacionActual: State<Double> = _puntuacionActual
+
+    private val _ConsumiblesValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val ConsumiblesValidados: State<List<Map<String, String>>> = _ConsumiblesValidados
+
+    private val _JokersValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val JokersValidados: State<List<Map<String, String>>> = _JokersValidados
+
+    private val _cargandoRelaciones = mutableStateOf(true)
+    val cargandoRelaciones: State<Boolean> = _cargandoRelaciones
 
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerJokers: ListenerRegistration? = null
@@ -40,6 +52,32 @@ class JokerViewModel : ViewModel() {
         _Cargar_Listas_Selector()
     }
 
+    fun _Validar_Relaciones(joker: JokerModel) {
+        viewModelScope.launch {
+            _cargandoRelaciones.value = true
+
+            try {
+                _ConsumiblesValidados.value = joker.sinergiasConsumibles.filter { mapaConsumible ->
+                    val idConsumible = mapaConsumible["id"] ?: return@filter false
+
+                    db.collection("consumibles").document(idConsumible).get().await().exists()
+                }
+
+                _JokersValidados.value = joker.sinergiasJokers.filter { mapaJoker ->
+                    val idJoker = mapaJoker["id"] ?: return@filter false
+
+                    db.collection("jokers").document(idJoker).get().await().exists()
+                }
+
+            } catch (e: Exception) {
+                _ConsumiblesValidados.value = emptyList()
+                _JokersValidados.value = emptyList()
+                println("JokerViewModel - Error al validar relaciones: ${e.message}")
+            } finally {
+                _cargandoRelaciones.value = false
+            }
+        }
+    }
 
     fun _Obtener_Jokers_De_Firebase() {
         _isLoading.value = true

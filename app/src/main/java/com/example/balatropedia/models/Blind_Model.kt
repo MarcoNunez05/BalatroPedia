@@ -3,6 +3,7 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.BlindModel
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,8 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class BlindViewModel : ViewModel() {
@@ -25,6 +28,12 @@ class BlindViewModel : ViewModel() {
     private val _puntuacionActual = mutableStateOf(0.0)
     val puntuacionActual: State<Double> = _puntuacionActual
 
+    private val _jokersValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val jokersValidados: State<List<Map<String, String>>> = _jokersValidados
+
+    private val _cargandoRelaciones = mutableStateOf(true)
+    val cargandoRelaciones: State<Boolean> = _cargandoRelaciones
+
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerBlinds: ListenerRegistration? = null
     private var vListenerJokers: ListenerRegistration? = null
@@ -35,6 +44,24 @@ class BlindViewModel : ViewModel() {
     init {
         _Obtener_Blinds_De_Firebase()
         _Cargar_Listas_Selector()
+    }
+
+    fun _Validar_Relaciones(blind: BlindModel) {
+        viewModelScope.launch {
+            _cargandoRelaciones.value = true
+
+            try {
+                _jokersValidados.value = blind.jokersRecomendados.filter { mapaJoker ->
+                    val idJoker = mapaJoker["id"] ?: return@filter false
+                    db.collection("jokers").document(idJoker).get().await().exists()
+                }
+            } catch (e: Exception) {
+                _jokersValidados.value = emptyList()
+                println("BlindViewModel - Error al validar relaciones: ${e.message}")
+            } finally {
+                _cargandoRelaciones.value = false
+            }
+        }
     }
 
     fun _Obtener_Blinds_De_Firebase() {

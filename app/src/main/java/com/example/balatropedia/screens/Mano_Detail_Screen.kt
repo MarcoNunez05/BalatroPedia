@@ -47,9 +47,14 @@ fun _Mano_Detail_Screen(
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
     val currentPuntuacion by viewModel.puntuacionActual
+    val jokersValidados by viewModel.jokersValidados
+    val cartasPlanetaValidadas by viewModel.cartasPlanetaValidadas
+    val cargandoRelaciones by viewModel.cargandoRelaciones
 
     DisposableEffect(mano.id) {
         viewModel._Iniciar_Listener_Puntuacion(mano.id, mano.puntuacion_usuarios)
+        viewModel._Validar_Relaciones(mano)
+
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
         }
@@ -165,32 +170,39 @@ fun _Mano_Detail_Screen(
 
             // JOKERS AFECTADOS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (mano.jokersAfectados.isEmpty()) {
-                    Text(
-                        text = "Jokers que potencian esta mano:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Aún no hay Jokers vinculados a esta mano.",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Jokers que potencian esta mano:",
-                        sinergias = mano.jokersAfectados,
-                        itemBackgroundColor = COLOR_JOKER_BACKGROUND,
-                        onItemClick = { idJoker ->
-                            onNavigateToJoker(idJoker)
-                        }
-                    )
+                    if (jokersValidados.isEmpty()) {
+                        Text(
+                            text = "Jokers que potencian esta mano:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Aún no hay Jokers vinculados a esta mano.",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Jokers que potencian esta mano:",
+                            sinergias = jokersValidados,
+                            itemBackgroundColor = COLOR_JOKER_BACKGROUND,
+                            onItemClick = { idJoker ->
+                                onNavigateToJoker(idJoker)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -200,32 +212,39 @@ fun _Mano_Detail_Screen(
 
             // CARTA PLANETA
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (mano.cartaPlaneta.isEmpty()) {
-                    Text(
-                        text = "Carta Planeta:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Planeta desconocido.",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Carta Planeta:",
-                        sinergias = mano.cartaPlaneta,
-                        itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
-                        onItemClick = { idPlaneta ->
-                            onNavigateToConsumible(idPlaneta)
-                        }
-                    )
+                    if (cartasPlanetaValidadas.isEmpty()) {
+                        Text(
+                            text = "Carta Planeta:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Planeta desconocido.",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Carta Planeta:",
+                            sinergias = cartasPlanetaValidadas,
+                            itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
+                            onItemClick = { idPlaneta ->
+                                onNavigateToConsumible(idPlaneta)
+                            }
+                        )
+                    }
                 }
             }
 

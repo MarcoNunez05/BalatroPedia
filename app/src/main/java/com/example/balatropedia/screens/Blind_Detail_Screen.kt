@@ -49,9 +49,12 @@ fun _Blind_Detail_Screen(
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
     val currentPuntuacion by viewModel.puntuacionActual
+    val jokersValidados by viewModel.jokersValidados
+    val cargandoRelaciones by viewModel.cargandoRelaciones
 
     DisposableEffect(blind.id) {
         viewModel._Iniciar_Listener_Puntuacion(blind.id, blind.puntuacion_usuarios)
+        viewModel._Validar_Relaciones(blind)
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
         }
@@ -167,32 +170,39 @@ fun _Blind_Detail_Screen(
 
             // JOKERS RECOMENDADOS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (blind.jokersRecomendados.isEmpty()) {
-                    Text(
-                        text = "Jokers Recomendados:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Aún no hay Jokers recomendados contra esta Blind.",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Jokers Recomendados:",
-                        sinergias = blind.jokersRecomendados,
-                        itemBackgroundColor = COLOR_JOKER_BACKGROUND,
-                        onItemClick = { idJoker ->
-                            onNavigateToJoker(idJoker)
-                        }
-                    )
+                    if (jokersValidados.isEmpty()) {
+                        Text(
+                            text = "Jokers Recomendados:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Aún no hay Jokers recomendados contra esta Blind.",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Jokers Recomendados:",
+                            sinergias = jokersValidados,
+                            itemBackgroundColor = COLOR_JOKER_BACKGROUND,
+                            onItemClick = { idJoker ->
+                                onNavigateToJoker(idJoker)
+                            }
+                        )
+                    }
                 }
             }
 

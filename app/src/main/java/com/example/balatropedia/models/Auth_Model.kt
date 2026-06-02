@@ -18,7 +18,6 @@ class AuthViewModel : ViewModel() {
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
 
     fun _Iniciar_Sesion(
         email: String,
