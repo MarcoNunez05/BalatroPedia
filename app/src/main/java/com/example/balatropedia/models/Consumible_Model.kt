@@ -3,6 +3,7 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.ConsumibleModel
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,8 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class ConsumibleViewModel : ViewModel() {
@@ -28,6 +31,12 @@ class ConsumibleViewModel : ViewModel() {
     private val _puntuacionActual = mutableStateOf(0.0)
     val puntuacionActual: State<Double> = _puntuacionActual
 
+    private val _boostersValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val boostersValidados: State<List<Map<String, String>>> = _boostersValidados
+
+    private val _cargandoRelaciones = mutableStateOf(true)
+    val cargandoRelaciones: State<Boolean> = _cargandoRelaciones
+
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerConsumibles: ListenerRegistration? = null
     private var vListenerSobres: ListenerRegistration? = null
@@ -35,6 +44,24 @@ class ConsumibleViewModel : ViewModel() {
     init {
         _Obtener_Consumibles_De_Firebase()
         _Obtener_Sobres_Para_Selector()
+    }
+
+    fun _Validar_Relaciones(consumible: ConsumibleModel) {
+        viewModelScope.launch {
+            _cargandoRelaciones.value = true
+
+            try {
+                _boostersValidados.value = consumible.boosterPack.filter { mapaBooster ->
+                    val idBooster = mapaBooster["id"] ?: return@filter false
+                    db.collection("boosterPacks").document(idBooster).get().await().exists()
+                }
+            } catch (e: Exception) {
+                _boostersValidados.value = emptyList()
+                println("ConsumibleViewModel - Error al validar relaciones: ${e.message}")
+            } finally {
+                _cargandoRelaciones.value = false
+            }
+        }
     }
 
     fun _Obtener_Consumibles_De_Firebase() {

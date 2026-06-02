@@ -3,6 +3,7 @@ package com.example.balatropedia.models
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.balatropedia.class_models.ChallengeModel
 import com.example.balatropedia.class_models.ItemSelectorModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,8 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.round
 
 class ChallengeViewModel : ViewModel() {
@@ -24,6 +27,27 @@ class ChallengeViewModel : ViewModel() {
 
     private val _puntuacionActual = mutableStateOf(0.0)
     val puntuacionActual: State<Double> = _puntuacionActual
+
+    private val _jokersIncluidosValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val jokersIncluidosValidados: State<List<Map<String, String>>> = _jokersIncluidosValidados
+
+    private val _consumiblesIncluidosValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val consumiblesIncluidosValidados: State<List<Map<String, String>>> = _consumiblesIncluidosValidados
+
+    private val _vouchersIncluidosValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val vouchersIncluidosValidados: State<List<Map<String, String>>> = _vouchersIncluidosValidados
+
+    private val _jokersProhibidosValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val jokersProhibidosValidados: State<List<Map<String, String>>> = _jokersProhibidosValidados
+
+    private val _consumiblesProhibidosValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val consumiblesProhibidosValidados: State<List<Map<String, String>>> = _consumiblesProhibidosValidados
+
+    private val _vouchersProhibidosValidados = mutableStateOf<List<Map<String, String>>>(emptyList())
+    val vouchersProhibidosValidados: State<List<Map<String, String>>> = _vouchersProhibidosValidados
+
+    private val _cargandoRelaciones = mutableStateOf(true)
+    val cargandoRelaciones: State<Boolean> = _cargandoRelaciones
 
     private var vListenerPuntuacion: ListenerRegistration? = null
     private var vListenerChallenges: ListenerRegistration? = null
@@ -43,6 +67,57 @@ class ChallengeViewModel : ViewModel() {
     init {
         _Obtener_Challenges_De_Firebase()
         _Cargar_Listas_Selector()
+    }
+
+    fun _Validar_Relaciones(challenge: ChallengeModel) {
+        viewModelScope.launch {
+            _cargandoRelaciones.value = true
+
+            try {
+                // INCLUIDOS
+                _jokersIncluidosValidados.value = challenge.jokersIncluidos.filter { mapa ->
+                    val id = mapa["id"] ?: return@filter false
+                    db.collection("jokers").document(id).get().await().exists()
+                }
+
+                _consumiblesIncluidosValidados.value = challenge.consumiblesIncluidos.filter { mapa ->
+                    val id = mapa["id"] ?: return@filter false
+                    db.collection("consumibles").document(id).get().await().exists()
+                }
+
+                _vouchersIncluidosValidados.value = challenge.vouchersIncluidos.filter { mapa ->
+                    val id = mapa["id"] ?: return@filter false
+                    db.collection("vouchers").document(id).get().await().exists()
+                }
+
+                // PROHIBIDOS
+                _jokersProhibidosValidados.value = challenge.jokersProhibidos.filter { mapa ->
+                    val id = mapa["id"] ?: return@filter false
+                    db.collection("jokers").document(id).get().await().exists()
+                }
+
+                _consumiblesProhibidosValidados.value = challenge.consumiblesProhibidos.filter { mapa ->
+                    val id = mapa["id"] ?: return@filter false
+                    db.collection("consumibles").document(id).get().await().exists()
+                }
+
+                _vouchersProhibidosValidados.value = challenge.vouchersProhibidos.filter { mapa ->
+                    val id = mapa["id"] ?: return@filter false
+                    db.collection("vouchers").document(id).get().await().exists()
+                }
+
+            } catch (e: Exception) {
+                _jokersIncluidosValidados.value = emptyList()
+                _consumiblesIncluidosValidados.value = emptyList()
+                _vouchersIncluidosValidados.value = emptyList()
+                _jokersProhibidosValidados.value = emptyList()
+                _consumiblesProhibidosValidados.value = emptyList()
+                _vouchersProhibidosValidados.value = emptyList()
+                println("ChallengeViewModel - Error al validar relaciones: ${e.message}")
+            } finally {
+                _cargandoRelaciones.value = false
+            }
+        }
     }
 
     fun _Obtener_Challenges_De_Firebase() {

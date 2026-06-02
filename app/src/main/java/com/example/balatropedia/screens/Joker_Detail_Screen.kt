@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -63,9 +64,13 @@ fun _Joker_Detail_Screen(
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
     val currentPuntuacion by viewModel.puntuacionActual
+    val consumiblesValidados by viewModel.ConsumiblesValidados
+    val jokersValidados by viewModel.JokersValidados
+    val cargandoRelaciones by viewModel.cargandoRelaciones
 
-    DisposableEffect(joker.nombre) {
+    DisposableEffect(joker.id) {
         viewModel._Iniciar_Listener_Puntuacion(joker.id, joker.puntuacion_usuarios)
+        viewModel._Validar_Relaciones(joker)
 
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
@@ -166,33 +171,39 @@ fun _Joker_Detail_Screen(
 
             // SINERGIAS CONSUMIBLES
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (joker.sinergiasConsumibles.isEmpty()) {
-                    Text(
-                        text = "Sinergias en consumibles:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Este Joker no tiene sinergias con consumibles",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-
-                    _Related_Section(
-                        titulo = "Sinergias en consumibles:",
-                        sinergias = joker.sinergiasConsumibles,
-                        itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
-                        onItemClick = { idConsumible ->
-                            onNavigateToConsumible(idConsumible)
-                        }
-                    )
+                    if (consumiblesValidados.isEmpty()) {
+                        Text(
+                            text = "Sinergias en consumibles:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Este Joker no tiene sinergias con consumibles",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Sinergias en consumibles:",
+                            sinergias = consumiblesValidados,
+                            itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
+                            onItemClick = { idConsumible ->
+                                onNavigateToConsumible(idConsumible)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -202,32 +213,39 @@ fun _Joker_Detail_Screen(
 
             // SINERGIAS JOKERS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (joker.sinergiasJokers.isEmpty()) {
-                    Text(
-                        text = "Sinergias en Jokers:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Este Joker no tiene sinergias con otros Jokers",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Sinergias en Jokers:",
-                        sinergias = joker.sinergiasJokers,
-                        itemBackgroundColor = COLOR_JOKER_BACKGROUND,
-                        onItemClick = { idJoker ->
-                            onNavigateToJoker(idJoker)
-                        }
-                    )
+                    if (jokersValidados.isEmpty()) {
+                        Text(
+                            text = "Sinergias en Jokers:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Este Joker no tiene sinergias con otros Jokers",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Sinergias en Jokers:",
+                            sinergias = jokersValidados,
+                            itemBackgroundColor = COLOR_JOKER_BACKGROUND,
+                            onItemClick = { idJoker ->
+                                onNavigateToJoker(idJoker)
+                            }
+                        )
+                    }
                 }
             }
 

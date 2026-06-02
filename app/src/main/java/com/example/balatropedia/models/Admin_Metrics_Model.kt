@@ -74,12 +74,12 @@ class AdminMetricsViewModel : ViewModel() {
                 val votosSnapshot = db.collectionGroup("votos").get().await()
                 val totalVotos = votosSnapshot.size()
 
-                var sumaTotalRatings = 0.0
+                var vSumaTotalRatings = 0.0
                 val conteoCategorias = mutableMapOf<String, Int>()
 
                 for (votoDoc in votosSnapshot.documents) {
                     val rating = votoDoc.getDouble("puntuacion") ?: 0.0
-                    sumaTotalRatings += rating
+                    vSumaTotalRatings += rating
 
                     val parentRef = votoDoc.reference.parent.parent
                     if (parentRef != null) {
@@ -88,7 +88,7 @@ class AdminMetricsViewModel : ViewModel() {
                     }
                 }
 
-                val promedioGlobal = if (totalVotos > 0) (sumaTotalRatings / totalVotos).toFloat() else 0f
+                val promedioGlobal = if (totalVotos > 0) (vSumaTotalRatings / totalVotos).toFloat() else 0f
 
                 val reporte = AdminReport(
                     ultima_actualizacion = System.currentTimeMillis(),

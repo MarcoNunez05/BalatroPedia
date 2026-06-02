@@ -51,9 +51,14 @@ fun _Mazo_Detail_Screen(
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
     val currentPuntuacion by viewModel.puntuacionActual
+    val consumiblesValidados by viewModel.consumiblesValidados
+    val vouchersValidados by viewModel.vouchersValidados
+    val cargandoRelaciones by viewModel.cargandoRelaciones
 
     DisposableEffect(mazo.id) {
         viewModel._Iniciar_Listener_Puntuacion(mazo.id, mazo.puntuacion_usuarios)
+        viewModel._Validar_Relaciones(mazo)
+
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
         }
@@ -140,32 +145,39 @@ fun _Mazo_Detail_Screen(
 
             // VOUCHERS INCLUIDOS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (mazo.vouchersIncluidos.isEmpty()) {
-                    Text(
-                        text = "Vouchers incluidos:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Este Mazo no incluye Vouchers iniciales",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Vouchers incluidos:",
-                        sinergias = mazo.vouchersIncluidos,
-                        itemBackgroundColor = COLOR_VOUCHERS_BACKGROUND,
-                        onItemClick = { idVoucher ->
-                            onNavigateToVoucher(idVoucher)
-                        }
-                    )
+                    if (vouchersValidados.isEmpty()) {
+                        Text(
+                            text = "Vouchers incluidos:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Este Mazo no incluye Vouchers iniciales",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Vouchers incluidos:",
+                            sinergias = vouchersValidados,
+                            itemBackgroundColor = COLOR_VOUCHERS_BACKGROUND,
+                            onItemClick = { idVoucher ->
+                                onNavigateToVoucher(idVoucher)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -175,32 +187,39 @@ fun _Mazo_Detail_Screen(
 
             // CONSUMIBLES INCLUIDOS
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (mazo.consumiblesIncluidos.isEmpty()) {
-                    Text(
-                        text = "Consumibles incluidos:",
+                if (cargandoRelaciones) {
+                    CircularProgressIndicator(
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontFamily = _BALATRO_FONT
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Este Mazo no incluye Consumibles iniciales",
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
                     )
                 } else {
-                    _Related_Section(
-                        titulo = "Consumibles incluidos:",
-                        sinergias = mazo.consumiblesIncluidos,
-                        itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
-                        onItemClick = { idConsumible ->
-                            onNavigateToConsumible(idConsumible)
-                        }
-                    )
+                    if (consumiblesValidados.isEmpty()) {
+                        Text(
+                            text = "Consumibles incluidos:",
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontFamily = _BALATRO_FONT
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Este Mazo no incluye Consumibles iniciales",
+                            color = Color.Gray,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    } else {
+                        _Related_Section(
+                            titulo = "Consumibles incluidos:",
+                            sinergias = consumiblesValidados,
+                            itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
+                            onItemClick = { idConsumible ->
+                                onNavigateToConsumible(idConsumible)
+                            }
+                        )
+                    }
                 }
             }
 

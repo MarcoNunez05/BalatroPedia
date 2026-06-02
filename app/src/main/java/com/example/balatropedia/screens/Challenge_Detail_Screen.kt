@@ -49,9 +49,19 @@ fun _Challenge_Detail_Screen(
     var vShowAuthWarningDialog by remember { mutableStateOf(false) }
 
     val currentPuntuacion by viewModel.puntuacionActual
+    val cargandoRelaciones by viewModel.cargandoRelaciones
+
+    val jokersIncluidosValidados by viewModel.jokersIncluidosValidados
+    val consumiblesIncluidosValidados by viewModel.consumiblesIncluidosValidados
+    val vouchersIncluidosValidados by viewModel.vouchersIncluidosValidados
+
+    val jokersProhibidosValidados by viewModel.jokersProhibidosValidados
+    val consumiblesProhibidosValidados by viewModel.consumiblesProhibidosValidados
+    val vouchersProhibidosValidados by viewModel.vouchersProhibidosValidados
 
     DisposableEffect(challenge.id) {
         viewModel._Iniciar_Listener_Puntuacion(challenge.id, challenge.puntuacion_usuarios)
+        viewModel._Validar_Relaciones(challenge)
         onDispose {
             viewModel._Detener_Listener_Puntuacion()
         }
@@ -152,53 +162,54 @@ fun _Challenge_Detail_Screen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // JOKERS INCLUIDOS
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (challenge.jokersIncluidos.isNotEmpty()) {
+            if (cargandoRelaciones) {
+                CircularProgressIndicator(
+                    color = Color(0xFF2E8B57),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
+                )
+            } else {
+                // JOKERS INCLUIDOS
+                if (jokersIncluidosValidados.isNotEmpty()) {
                     _Related_Section(
                         titulo = "Jokers:",
-                        sinergias = challenge.jokersIncluidos,
+                        sinergias = jokersIncluidosValidados,
                         itemBackgroundColor = COLOR_JOKER_BACKGROUND,
                         onItemClick = { id -> onNavigateToJoker(id) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // CONSUMIBLES INCLUIDOS
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (challenge.consumiblesIncluidos.isNotEmpty()) {
+                // CONSUMIBLES INCLUIDOS
+                if (consumiblesIncluidosValidados.isNotEmpty()) {
                     _Related_Section(
                         titulo = "Consumibles:",
-                        sinergias = challenge.consumiblesIncluidos,
+                        sinergias = consumiblesIncluidosValidados,
                         itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
                         onItemClick = { id -> onNavigateToConsumible(id) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // VOUCHERS INCLUIDOS
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (challenge.vouchersIncluidos.isNotEmpty()) {
+                // VOUCHERS INCLUIDOS
+                if (vouchersIncluidosValidados.isNotEmpty()) {
                     _Related_Section(
                         titulo = "Vouchers:",
-                        sinergias = challenge.vouchersIncluidos,
+                        sinergias = vouchersIncluidosValidados,
                         itemBackgroundColor = COLOR_VOUCHERS_BACKGROUND,
                         onItemClick = { id -> onNavigateToVoucher(id) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            if (challenge.jokersIncluidos.isEmpty() && challenge.consumiblesIncluidos.isEmpty() && challenge.vouchersIncluidos.isEmpty()) {
-                Text(
-                    text = "Este Challenge no incluye elementos iniciales adicionales.",
-                    color = Color.Gray,
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                )
+                if (jokersIncluidosValidados.isEmpty() && consumiblesIncluidosValidados.isEmpty() && vouchersIncluidosValidados.isEmpty()) {
+                    Text(
+                        text = "Este Challenge no incluye elementos iniciales adicionales.",
+                        color = Color.Gray,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -215,53 +226,54 @@ fun _Challenge_Detail_Screen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // JOKERS PROHIBIDOS
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (challenge.jokersProhibidos.isNotEmpty()) {
+            if (cargandoRelaciones) {
+                CircularProgressIndicator(
+                    color = Color(0xFFC33C3C),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
+                )
+            } else {
+                // JOKERS PROHIBIDOS
+                if (jokersProhibidosValidados.isNotEmpty()) {
                     _Related_Section(
                         titulo = "Jokers baneados:",
-                        sinergias = challenge.jokersProhibidos,
+                        sinergias = jokersProhibidosValidados,
                         itemBackgroundColor = COLOR_JOKER_BACKGROUND,
                         onItemClick = { id -> onNavigateToJoker(id) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // CONSUMIBLES PROHIBIDOS
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (challenge.consumiblesProhibidos.isNotEmpty()) {
+                // CONSUMIBLES PROHIBIDOS
+                if (consumiblesProhibidosValidados.isNotEmpty()) {
                     _Related_Section(
                         titulo = "Consumibles baneados:",
-                        sinergias = challenge.consumiblesProhibidos,
+                        sinergias = consumiblesProhibidosValidados,
                         itemBackgroundColor = COLOR_CONSUMIBLES_BACKGROUND,
                         onItemClick = { id -> onNavigateToConsumible(id) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // VOUCHERS PROHIBIDOS
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (challenge.vouchersProhibidos.isNotEmpty()) {
+                // VOUCHERS PROHIBIDOS
+                if (vouchersProhibidosValidados.isNotEmpty()) {
                     _Related_Section(
                         titulo = "Vouchers baneados:",
-                        sinergias = challenge.vouchersProhibidos,
+                        sinergias = vouchersProhibidosValidados,
                         itemBackgroundColor = COLOR_VOUCHERS_BACKGROUND,
                         onItemClick = { id -> onNavigateToVoucher(id) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            if (challenge.jokersProhibidos.isEmpty() && challenge.consumiblesProhibidos.isEmpty() && challenge.vouchersProhibidos.isEmpty()) {
-                Text(
-                    text = "No hay elementos prohibidos en este Challenge.",
-                    color = Color.Gray,
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                )
+                if (jokersProhibidosValidados.isEmpty() && consumiblesProhibidosValidados.isEmpty() && vouchersProhibidosValidados.isEmpty()) {
+                    Text(
+                        text = "No hay elementos prohibidos en este Challenge.",
+                        color = Color.Gray,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(50.dp))
