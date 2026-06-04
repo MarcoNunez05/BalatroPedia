@@ -163,8 +163,8 @@ fun _Voucher_Edit_Screen(
                 text = "Guardar Cambios",
                 isLoading = vIsSaving,
                 onClick = {
-                    if (vNombre.isBlank() || vEfecto.isBlank() || vImagenUrl.isBlank()) {
-                        Toast.makeText(context, "Nombre, Efecto e Imagen son obligatorios", Toast.LENGTH_SHORT).show()
+                    if (vNombre.isBlank() || vEfecto.isBlank() || vImagenUrl.isBlank() || vRequisitos.isBlank()) {
+                        Toast.makeText(context, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
                         return@_Balatro_Primary_Button
                     }
 
