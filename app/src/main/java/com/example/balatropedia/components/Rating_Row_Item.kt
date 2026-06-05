@@ -1,3 +1,6 @@
+// Última modificación: 31/05/2026
+// Autor: Marco Núñez
+
 package com.example.balatropedia.components
 
 import androidx.compose.foundation.background
@@ -19,11 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.balatropedia.R
 import com.example.balatropedia.screens.UserRatingItem
 import com.example.balatropedia.ui.theme.COLOR_BLINDS_BACKGROUND
 import com.example.balatropedia.ui.theme.COLOR_BOOSTER_BACKGROUND

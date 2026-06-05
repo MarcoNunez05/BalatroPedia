@@ -1,3 +1,6 @@
+// Última modificación: 31/05/2026
+// Autor: Marco Núñez
+
 package com.example.balatropedia.class_models
 
 data class ChallengeModel(

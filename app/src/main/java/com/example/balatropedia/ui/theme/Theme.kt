@@ -1,3 +1,6 @@
+// Última modificación: 20/05/2026
+// Autor: Marco Núñez
+
 package com.example.balatropedia.ui.theme
 
 import android.app.Activity
