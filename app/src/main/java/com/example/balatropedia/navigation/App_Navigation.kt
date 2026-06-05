@@ -1,3 +1,6 @@
+// Última modificación: 01/06/2026
+// Autor: Marco Núñez
+
 package com.example.balatropedia.navigation
 
 import androidx.compose.foundation.layout.Box
