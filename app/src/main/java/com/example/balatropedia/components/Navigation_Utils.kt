@@ -1,6 +1,3 @@
-// Última modificación: 01/06/2026
-// Autor: Marco Núñez
-
 package com.example.balatropedia.components
 
 import androidx.lifecycle.Lifecycle

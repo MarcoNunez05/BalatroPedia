@@ -1,6 +1,3 @@
-// Última modificación: 04/06/2026
-// Autor: Marco Núñez
-
 package com.example.balatropedia.screens
 
 import android.widget.Toast

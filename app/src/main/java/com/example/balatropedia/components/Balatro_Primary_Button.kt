@@ -1,6 +1,3 @@
-// Última modificación: 28/05/2026
-// Autor: Marco Núñez
-
 package com.example.balatropedia.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
