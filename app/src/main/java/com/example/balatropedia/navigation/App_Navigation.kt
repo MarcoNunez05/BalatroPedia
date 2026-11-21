@@ -65,6 +65,11 @@ import com.example.balatropedia.screens._Mano_Screen
 import com.example.balatropedia.screens._User_Ratings_Screen
 import com.example.balatropedia.screens._Admin_Metrics_Screen
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 
 // Función que controla la navegación de la app
 @Composable
@@ -92,7 +97,11 @@ fun _App_Navigation(isAdmin: Boolean, modifier: Modifier){
 
     NavHost(
         navController = navController,
-        startDestination = "Home"
+        startDestination = "Home",
+        enterTransition = { fadeIn(animationSpec = tween(durationMillis = 150)) },
+        exitTransition = { fadeOut(animationSpec = tween(durationMillis = 150)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(durationMillis = 150)) },
+        popExitTransition = { fadeOut(animationSpec = tween(durationMillis = 150)) }
     ) {
         composable("Home") {
             _Home_Screen(
