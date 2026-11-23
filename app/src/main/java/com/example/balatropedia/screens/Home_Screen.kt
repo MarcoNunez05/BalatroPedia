@@ -1,4 +1,4 @@
-// Última modificación: 30/05/2026
+// Última modificación: 21/11/2026
 // Autor: Marco Núñez
 
 package com.example.balatropedia.screens
@@ -8,10 +8,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccessibilityNew
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -56,71 +62,106 @@ data class CategoryData(
 fun _Home_Screen(
     isAdmin: Boolean,
     onProfileClick: () -> Unit,
-    onCategoryClick: (String) -> Unit
-)
-{
-
+    onCategoryClick: (String) -> Unit,
+    onAccessibilityClick: () -> Unit = {}
+) {
     val CATEGORIES = remember {
-        listOf<CategoryData>(
-            CategoryData("Jokers", R.drawable.main_joker, COLOR_JOKER_BACKGROUND,
-                COLOR_JOKER_TEXT, "jokers"),
-            CategoryData("Mazos", R.drawable.main_mazos, COLOR_MAZOS_BACKGROUND, COLOR_MAZOS_TEXT, "mazos"),
-            CategoryData("Vouchers", R.drawable.main_voucher,
-                COLOR_VOUCHERS_BACKGROUND, COLOR_VOUCHERS_TEXT, "vouchers"),
-            CategoryData("Consumibles", R.drawable.main_consumibles,
-                COLOR_CONSUMIBLES_BACKGROUND, COLOR_CONSUMIBLES_TEXT, "consumibles"),
-            CategoryData("Manos", R.drawable.main_manos, COLOR_MANOS_BACKGROUND, COLOR_MANOS_TEXT, "manos"),
-            CategoryData("Booster Packs", R.drawable.main_booster,
-                COLOR_BOOSTER_BACKGROUND, COLOR_BOOSTER_TEXT, "boosterPacks"),
-            CategoryData("Blinds", R.drawable.main_blind,
-                COLOR_BLINDS_BACKGROUND, COLOR_BLINDS_TEXT, "blinds"),
-            CategoryData("Challenges", R.drawable.main_challenge,
-                COLOR_CHALLENGES_BACKGROUND, COLOR_CHALLENGES_TEXT, "challenges")
+        listOf(
+            CategoryData(
+                "Jokers", R.drawable.main_joker, COLOR_JOKER_BACKGROUND,
+                COLOR_JOKER_TEXT, "jokers"
+            ),
+            CategoryData(
+                "Mazos", R.drawable.main_mazos, COLOR_MAZOS_BACKGROUND,
+                COLOR_MAZOS_TEXT, "mazos"
+            ),
+            CategoryData(
+                "Vouchers", R.drawable.main_voucher,
+                COLOR_VOUCHERS_BACKGROUND, COLOR_VOUCHERS_TEXT, "vouchers"
+            ),
+            CategoryData(
+                "Consumibles", R.drawable.main_consumibles,
+                COLOR_CONSUMIBLES_BACKGROUND, COLOR_CONSUMIBLES_TEXT, "consumibles"
+            ),
+            CategoryData(
+                "Manos", R.drawable.main_manos, COLOR_MANOS_BACKGROUND,
+                COLOR_MANOS_TEXT, "manos"
+            ),
+            CategoryData(
+                "Booster Packs", R.drawable.main_booster,
+                COLOR_BOOSTER_BACKGROUND, COLOR_BOOSTER_TEXT, "boosterPacks"
+            ),
+            CategoryData(
+                "Blinds", R.drawable.main_blind,
+                COLOR_BLINDS_BACKGROUND, COLOR_BLINDS_TEXT, "blinds"
+            ),
+            CategoryData(
+                "Challenges", R.drawable.main_challenge,
+                COLOR_CHALLENGES_BACKGROUND, COLOR_CHALLENGES_TEXT, "challenges"
+            )
         )
     }
 
-    Column(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(COLOR_BACKGROUND)
-            .safeDrawingPadding()
-    ) {
-
-        _Balatropedia_Header(
-            comeBack = false,
-            onBackClick = { },
-            onProfileClick = onProfileClick
-        )
-
+            .safeDrawingPadding(),
+        containerColor = COLOR_BACKGROUND,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAccessibilityClick,
+                containerColor = Color(0xFF00BFFF),
+                contentColor = Color.Black
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AccessibilityNew,
+                    contentDescription = "Opciones de accesibilidad"
+                )
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(innerPadding)
         ) {
-
-            Text(
-                text = "Explore las categorías",
-                color = Color.White,
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 4.dp).fillMaxSize(),
-                fontFamily = _BALATRO_FONT,
-                textAlign = TextAlign.Center
+            _Balatropedia_Header(
+                comeBack = false,
+                onBackClick = { },
+                onProfileClick = onProfileClick
             )
 
-
-            CATEGORIES.forEach { category ->
-                _Category_Button(
-                    text = category.TEXT,
-                    imageResId = category.IMAGE_ID,
-                    backgroundColor = category.BACKGROUND_COLOR,
-                    textColor = category.TEXT_COLOR,
-                    onClick = {
-                        onCategoryClick(category.ID)
-                    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "Explore las categorías",
+                    color = Color.White,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .fillMaxWidth(),
+                    fontFamily = _BALATRO_FONT,
+                    textAlign = TextAlign.Center
                 )
+
+                CATEGORIES.forEach { category ->
+                    _Category_Button(
+                        text = category.TEXT,
+                        imageResId = category.IMAGE_ID,
+                        backgroundColor = category.BACKGROUND_COLOR,
+                        textColor = category.TEXT_COLOR,
+                        onClick = {
+                            onCategoryClick(category.ID)
+                        }
+                    )
+                }
             }
         }
     }

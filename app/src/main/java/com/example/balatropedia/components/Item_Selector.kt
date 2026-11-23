@@ -1,4 +1,4 @@
-// Última modificación: 28/05/2026
+// Última modificación: 21/11/2026
 // Autor: Marco Núñez
 
 package com.example.balatropedia.components
@@ -19,14 +19,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.balatropedia.R
 import com.example.balatropedia.class_models.ItemSelectorModel
+import com.example.balatropedia.models.ColorBlindMode
+import com.example.balatropedia.models.LocalAccessibilityState
+import com.example.balatropedia.models.ModalAccessibilityWrapper
 import com.example.balatropedia.ui.theme.COLOR_BACKGROUND
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import kotlinx.coroutines.launch
@@ -40,9 +50,22 @@ fun _Item_Selector(
     onDismiss: () -> Unit,
     onItemSelected: (ItemSelectorModel) -> Unit
 ) {
+    val accessibilityState = LocalAccessibilityState.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val coroutineScope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
+
+    val baseDensity = LocalDensity.current
+    val scaledDensity = remember(baseDensity) {
+        Density(
+            density = baseDensity.density,
+            fontScale = baseDensity.fontScale
+        )
+    }
+
+    val colorMatrix = remember(accessibilityState.colorBlindMode) {
+        colorMatrixForMode(accessibilityState.colorBlindMode)
+    }
 
     val itemsFiltrados by remember(searchQuery, itemsDisponibles) {
         derivedStateOf {
@@ -58,107 +81,164 @@ fun _Item_Selector(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = COLOR_BACKGROUND,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Gray) }
+        containerColor = Color.Transparent,
+        dragHandle = null
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp)
-        ) {
-            Text(
-                text = titulo,
-                color = Color.White,
-                fontSize = 24.sp,
-                fontFamily = _BALATRO_FONT,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier
+        ModalAccessibilityWrapper { filterModifier ->
+            Box(
+                modifier = filterModifier
                     .fillMaxWidth()
-                    .border(1.dp, Color(0xFF3F4552), RoundedCornerShape(6.dp)),
-                placeholder = { Text("Buscar por nombre...", color = Color.Gray) },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Gray)
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF14161B),
-                    unfocusedContainerColor = Color(0xFF14161B),
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                ),
-                shape = RoundedCornerShape(6.dp),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxHeight(0.6f)
+                    .background(
+                        Color(0xFF1E222B),
+                        RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                    )
             ) {
-                if (itemsFiltrados.isEmpty()) {
-                    item {
-                        Text(
-                            text = "No se encontraron resultados",
-                            color = Color.Gray,
-                            modifier = Modifier
-                                .padding(32.dp)
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                } else {
-                    items(itemsFiltrados) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    coroutineScope.launch {
-                                        sheetState.hide()
-                                        onItemSelected(item)
-                                    }
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AsyncImage(
-                                model = item.imagenUrl,
-                                contentDescription = null,
-                                placeholder = painterResource(R.drawable.main_joker),
-                                error = painterResource(R.drawable.main_joker),
-                                modifier = Modifier
-                                    .size(45.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(Color(0xFF3F4552)),
-                                contentScale = ContentScale.Fit
-                            )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BottomSheetDefaults.DragHandle(color = Color.Gray)
 
-                            Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = titulo,
+                        color = Color.White,
+                        fontSize = 24.sp,
+                        fontFamily = _BALATRO_FONT,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
 
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color(0xFF3F4552), RoundedCornerShape(6.dp)),
+                        placeholder = {
                             Text(
-                                text = item.nombre,
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                modifier = Modifier.weight(1f)
+                                text = "Buscar por nombre...",
+                                color = Color.Gray,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Gray)
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFF14161B),
+                            unfocusedContainerColor = Color(0xFF14161B),
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(6.dp),
+                        singleLine = true
+                    )
 
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Añadir",
-                                tint = Color(0xFFC5A53F)
-                            )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxHeight(0.6f)
+                    ) {
+                        if (itemsFiltrados.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "No se encontraron resultados",
+                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .padding(32.dp)
+                                        .fillMaxWidth(),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            items(itemsFiltrados) { item ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            coroutineScope.launch {
+                                                sheetState.hide()
+                                                onItemSelected(item)
+                                            }
+                                        }
+                                        .padding(vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = item.imagenUrl,
+                                        contentDescription = null,
+                                        placeholder = painterResource(R.drawable.main_joker),
+                                        error = painterResource(R.drawable.main_joker),
+                                        modifier = Modifier
+                                            .size(45.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0xFF3F4552)),
+                                        contentScale = ContentScale.Fit
+                                    )
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Text(
+                                        text = item.nombre,
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 8.dp)
+                                    )
+
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Añadir",
+                                        tint = Color(0xFFC5A53F)
+                                    )
+                                }
+                                HorizontalDivider(color = Color(0xFF2C323F))
+                            }
                         }
-                        HorizontalDivider(color = Color(0xFF2C323F))
                     }
                 }
             }
         }
+    }
+}
+
+private fun colorMatrixForMode(mode: ColorBlindMode): ColorMatrix {
+    return when (mode) {
+        ColorBlindMode.NONE -> ColorMatrix()
+        ColorBlindMode.PROTANOPIA -> ColorMatrix(
+            floatArrayOf(
+                0.567f, 0.433f, 0f, 0f, 0f,
+                0.558f, 0.442f, 0f, 0f, 0f,
+                0f,     0.242f, 0.758f, 0f, 0f,
+                0f,     0f,     0f,     1f, 0f
+            )
+        )
+        ColorBlindMode.DEUTERANOPIA -> ColorMatrix(
+            floatArrayOf(
+                0.625f, 0.375f, 0f, 0f, 0f,
+                0.7f,   0.3f,   0f, 0f, 0f,
+                0f,     0.3f,   0.7f, 0f, 0f,
+                0f,     0f,     0f,   1f, 0f
+            )
+        )
+        ColorBlindMode.TRITANOPIA -> ColorMatrix(
+            floatArrayOf(
+                0.95f, 0.05f,  0f,     0f, 0f,
+                0f,    0.433f, 0.567f, 0f, 0f,
+                0f,    0.475f, 0.525f, 0f, 0f,
+                0f,    0f,     0f,     1f, 0f
+            )
+        )
+        ColorBlindMode.MONOCHROME -> ColorMatrix().apply { setToSaturation(0f) }
     }
 }

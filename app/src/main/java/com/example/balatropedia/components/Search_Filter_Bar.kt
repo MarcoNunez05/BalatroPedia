@@ -1,4 +1,4 @@
-// Última modificación: 01/06/2026
+// Última modificación: 21/11/2026
 // Autor: Marco Núñez
 
 package com.example.balatropedia.components
@@ -8,7 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,7 +48,7 @@ fun _Search_Filter_Bar(
             onValueChange = onSearchQueryChange,
             modifier = Modifier
                 .weight(1f)
-                .height(50.dp)
+                .heightIn(min = 50.dp)
                 .border(1.dp, Color(0xFF3F4552), RoundedCornerShape(6.dp)),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFF252932),

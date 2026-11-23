@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             BalatroPediaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { fillMaxSize ->
 
                     val auth = FirebaseAuth.getInstance()
                     val db = FirebaseFirestore.getInstance()
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                     if (!vIsCheckingRole) {
                         _App_Navigation(
                             isAdmin = vIsAdmin,
-                            modifier = Modifier.padding(innerPadding)
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }

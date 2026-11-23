@@ -1,4 +1,4 @@
-// Última modificación: 31/05/2026
+// Última modificación: 22/11/2026
 // Autor: Marco Núñez
 
 package com.example.balatropedia.screens
@@ -16,12 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.balatropedia.components._Balatro_Input
 import com.example.balatropedia.components._Balatro_Primary_Button
 import com.example.balatropedia.components._Balatro_Selector
 import com.example.balatropedia.components._Balatropedia_Header
+import com.example.balatropedia.models.ModalAccessibilityWrapper
 import com.example.balatropedia.ui.theme._BALATRO_FONT
 import com.example.balatropedia.viewmodels.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -66,7 +69,9 @@ fun _Config_Account_Screen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().safeDrawingPadding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding(),
         topBar = {
             _Balatropedia_Header(
                 comeBack = true,
@@ -92,7 +97,11 @@ fun _Config_Account_Screen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            _Balatro_Input(label = "Nombre de usuario", value = vUsername, onValueChange = { vUsername = it })
+            _Balatro_Input(
+                label = "Nombre de usuario",
+                value = vUsername,
+                onValueChange = { vUsername = it }
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             _Balatro_Selector(
@@ -120,10 +129,20 @@ fun _Config_Account_Screen(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            _Balatro_Input(label = "Nueva contraseña", value = vPassword, isPassword = true, onValueChange = { vPassword = it })
+            _Balatro_Input(
+                label = "Nueva contraseña",
+                value = vPassword,
+                isPassword = true,
+                onValueChange = { vPassword = it }
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
-            _Balatro_Input(label = "Confirmar contraseña", value = vConfirmPassword, isPassword = true, onValueChange = { vConfirmPassword = it })
+            _Balatro_Input(
+                label = "Confirmar contraseña",
+                value = vConfirmPassword,
+                isPassword = true,
+                onValueChange = { vConfirmPassword = it }
+            )
 
             vErrorMessage?.let {
                 Text(
@@ -166,7 +185,7 @@ fun _Config_Account_Screen(
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp),
+                    .heightIn(min = 55.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9E1010)),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -174,83 +193,119 @@ fun _Config_Account_Screen(
                     text = "Eliminar cuenta",
                     color = Color.White,
                     fontSize = 24.sp,
-                    fontFamily = _BALATRO_FONT
+                    fontFamily = _BALATRO_FONT,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
 
         if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = {
-                    showDeleteDialog = false
-                    vDeletePassword = ""
-                    vErrorMessage = null
-                },
-                title = {
-                    Text(
-                        text = "Eliminar Cuenta",
-                        fontFamily = _BALATRO_FONT,
-                        fontSize = 24.sp
-                    )
-                },
-                text = {
-                    Column {
-                        Text(
-                            text = "Esta acción no se puede deshacer. Todos tus datos y puntuaciones se perderán de forma permanente.",
-                            color = Color.White,
-                            fontSize = 16.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+            val dismissDialog = {
+                showDeleteDialog = false
+                vDeletePassword = ""
+                vErrorMessage = null
+            }
 
-                        _Balatro_Input(
-                            label = "Ingresa tu contraseña para confirmar",
-                            value = vDeletePassword,
-                            isPassword = true,
-                            onValueChange = { vDeletePassword = it }
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            if (vDeletePassword.isNotEmpty()) {
-                                viewModel._Eliminar_Usuario(
-                                    password = vDeletePassword,
-                                    onSuccess = {
-                                        showDeleteDialog = false
-                                        Toast.makeText(context, "Cuenta eliminada de Balatropedia", Toast.LENGTH_LONG).show()
-                                        onAccountDeleted()
-                                    },
-                                    onError = { error ->
-                                        vErrorMessage = error
-                                    }
+            Dialog(onDismissRequest = dismissDialog) {
+                ModalAccessibilityWrapper { filterModifier ->
+                    Box(modifier = filterModifier.fillMaxWidth()) {
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF2C323F)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                            ) {
+                                Text(
+                                    text = "Eliminar Cuenta",
+                                    color = Color.White,
+                                    fontFamily = _BALATRO_FONT,
+                                    fontSize = 24.sp
                                 )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = "Esta acción no se puede deshacer. Todos tus datos y puntuaciones se perderán de forma permanente.",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    lineHeight = 22.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                _Balatro_Input(
+                                    label = "Ingresa tu contraseña para confirmar",
+                                    value = vDeletePassword,
+                                    isPassword = true,
+                                    onValueChange = { vDeletePassword = it }
+                                )
+
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    TextButton(
+                                        onClick = dismissDialog,
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = "Cancelar",
+                                            color = Color.Gray,
+                                            fontSize = 16.sp,
+                                            softWrap = false,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+
+                                    TextButton(
+                                        onClick = {
+                                            if (vDeletePassword.isNotEmpty()) {
+                                                viewModel._Eliminar_Usuario(
+                                                    password = vDeletePassword,
+                                                    onSuccess = {
+                                                        showDeleteDialog = false
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Cuenta eliminada de Balatropedia",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                        onAccountDeleted()
+                                                    },
+                                                    onError = { error ->
+                                                        vErrorMessage = error
+                                                    }
+                                                )
+                                            }
+                                        },
+                                        enabled = vDeletePassword.isNotBlank(),
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = "Sí, eliminar",
+                                            color = if (vDeletePassword.isNotBlank()) Color(0xFFCC1D1D) else Color.Gray,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
                             }
-                        },
-                        enabled = vDeletePassword.isNotBlank()
-                    ) {
-                        Text(
-                            text = "Sí, eliminar",
-                            color = if (vDeletePassword.isNotBlank()) Color(0xFFCC1D1D) else Color.Gray,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            vDeletePassword = ""
-                            vErrorMessage = null
                         }
-                    ) {
-                        Text("Cancelar", color = Color.Gray)
                     }
-                },
-                containerColor = Color(0xFF2C323F),
-                titleContentColor = Color.White
-            )
+                }
+            }
         }
     }
 }
